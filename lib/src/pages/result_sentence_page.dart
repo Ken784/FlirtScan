@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/icons/app_icon_widgets.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/cards/quote_analysis_card.dart';
 import '../widgets/buttons/app_button.dart';
@@ -24,7 +25,7 @@ class ResultSentencePage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
             children: [
-              const PageHeader(title: '逐句分析', leading: Icon(Icons.arrow_back)),
+              PageHeader(title: '逐句分析', leading: AppIconWidgets.arrowBack()),
               const SizedBox(height: AppSpacing.s16),
               const QuoteAnalysisCard(
                 side: QuoteSide.opponent,
@@ -65,7 +66,7 @@ class ResultSentencePage extends StatelessWidget {
               AppButton(
                 label: '截圖',
                 variant: AppButtonVariant.primary,
-                leading: const Icon(Icons.camera_alt_outlined, color: Colors.white),
+                leading: AppIconWidgets.camera(size: 24, color: Colors.white),
                 onPressed: () {},
               ),
             ],

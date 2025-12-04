@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flirt_scan/l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
-import 'src/core/routing/app_router.dart';
+import 'src/core/config/app_router.dart';
 
 void main() {
   runApp(

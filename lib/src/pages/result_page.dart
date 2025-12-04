@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/icons/app_icon_widgets.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/cards/score_summary_card.dart';
 import '../widgets/cards/insight_card.dart';
@@ -27,10 +28,10 @@ class ResultPage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
             children: [
-              const PageHeader(
+              PageHeader(
                 title: '分析結果',
-                leading: Icon(Icons.arrow_back),
-                trailing: Icon(Icons.delete_outline),
+                leading: AppIconWidgets.arrowBack(),
+                trailing: AppIconWidgets.delete(),
               ),
               const SizedBox(height: AppSpacing.s16),
               const ScoreSummaryCard(
@@ -54,14 +55,14 @@ class ResultPage extends StatelessWidget {
               AppButton(
                 label: '進階逐句分析',
                 variant: AppButtonVariant.primary,
-                leading: const Icon(Icons.list, color: Colors.white),
+                leading: AppIconWidgets.list(size: 24, color: Colors.white),
                 onPressed: () => context.push(ResultSentencePage.route),
               ),
               const SizedBox(height: AppSpacing.s16),
               AppButton(
                 label: '截圖',
                 variant: AppButtonVariant.primary,
-                leading: const Icon(Icons.camera_alt_outlined, color: Colors.white),
+                leading: AppIconWidgets.camera(size: 24, color: Colors.white),
                 onPressed: () {},
               ),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/icons/app_icon_widgets.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/buttons/app_button.dart';
 
@@ -23,7 +25,7 @@ class ErrorDialogDemoPage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
             children: [
-              const PageHeader(title: '錯誤訊息範例', leading: Icon(Icons.favorite_border)),
+              PageHeader(title: '錯誤訊息範例', leading: AppIconWidgets.heartOutline()),
               const SizedBox(height: AppSpacing.s24),
               AppButton(
                 label: '顯示錯誤 Dialog',

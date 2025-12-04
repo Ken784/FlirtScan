@@ -1,0 +1,12 @@
+{
+  "@@locale": "zh",
+  "appTitle": "FlirtScan",
+  "@appTitle": {
+    "description": "應用程式標題"
+  },
+  "homePageTitle": "曖昧分析",
+  "@homePageTitle": {
+    "description": "首頁標題"
+  }
+}
+

@@ -17,6 +17,9 @@ dependencies:
   
   # Routing
   go_router: ^13.2.2
+  
+  # Icons
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -28,3 +31,7 @@ flutter:
   
   # Internationalization
   generate: true
+  
+  # Assets
+  assets:
+    - assets/icons/
