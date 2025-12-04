@@ -1,34 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
-import 'src/pages/home_page.dart';
-import 'src/pages/uploaded_page.dart';
-import 'src/pages/result_page.dart';
-import 'src/pages/result_sentence_page.dart';
-import 'src/pages/history_page.dart';
-import 'src/pages/error_dialog_demo_page.dart';
+import 'src/core/routing/app_router.dart';
 
 void main() {
-  runApp(const FlirtScanApp());
+  runApp(
+    const ProviderScope(
+      child: FlirtScanApp(),
+    ),
+  );
 }
 
-class FlirtScanApp extends StatelessWidget {
+class FlirtScanApp extends ConsumerWidget {
   const FlirtScanApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+    
+    return MaterialApp.router(
       title: 'FlirtScan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.build(),
-      initialRoute: HomePage.route,
-      routes: {
-        HomePage.route: (_) => const HomePage(),
-        UploadedPage.route: (_) => const UploadedPage(),
-        ResultPage.route: (_) => const ResultPage(),
-        ResultSentencePage.route: (_) => const ResultSentencePage(),
-        HistoryPage.route: (_) => const HistoryPage(),
-        ErrorDialogDemoPage.route: (_) => const ErrorDialogDemoPage(),
-      },
+      routerConfig: router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh', 'TW'),
+      ],
+      locale: const Locale('zh', 'TW'),
     );
   }
 }

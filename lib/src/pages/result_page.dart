@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../widgets/navigation/page_header.dart';
@@ -54,7 +55,7 @@ class ResultPage extends StatelessWidget {
                 label: '進階逐句分析',
                 variant: AppButtonVariant.primary,
                 leading: const Icon(Icons.list, color: Colors.white),
-                onPressed: () => Navigator.pushNamed(context, ResultSentencePage.route),
+                onPressed: () => context.push(ResultSentencePage.route),
               ),
               const SizedBox(height: AppSpacing.s16),
               AppButton(
@@ -70,6 +71,8 @@ class ResultPage extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

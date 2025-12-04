@@ -34,7 +34,7 @@ class ErrorDialogDemoPage extends StatelessWidget {
                       title: const Text('錯誤標題'),
                       content: const Text('錯誤訊息內容顯示錯誤訊息內容顯示錯誤訊息內容顯示錯誤訊息內容顯示'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('button')),
+                        TextButton(onPressed: () => ctx.pop(), child: const Text('button')),
                       ],
                     ),
                   );
@@ -47,6 +47,8 @@ class ErrorDialogDemoPage extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

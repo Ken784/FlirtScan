@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../widgets/navigation/page_header.dart';
@@ -49,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   label: '選擇對話截圖',
                   variant: AppButtonVariant.primary,
                   leading: const Icon(Icons.arrow_upward, color: Colors.white),
-                  onPressed: () => Navigator.pushNamed(context, UploadedPage.route),
+                  onPressed: () => context.push(UploadedPage.route),
                 ),
               ),
               const SizedBox(height: AppSpacing.s24),
@@ -95,6 +96,8 @@ class _CheckItem extends StatelessWidget {
     );
   }
 }
+
+
 
 
 

@@ -9,6 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.5.1
+  
+  # Routing
+  go_router: ^13.2.2
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +25,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Internationalization
+  generate: true

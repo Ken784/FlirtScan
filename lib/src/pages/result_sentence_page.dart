@@ -78,3 +78,6 @@ class ResultSentencePage extends StatelessWidget {
 
 
 
+
+
+
