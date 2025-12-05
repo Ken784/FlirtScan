@@ -5,15 +5,20 @@ import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
-class InsightCard extends StatelessWidget {
-  const InsightCard({
+/// 維度分析卡片
+class DimensionAnalysisCard extends StatelessWidget {
+  const DimensionAnalysisCard({
     super.key,
     required this.title,
-    required this.body,
+    required this.score,
+    required this.maxScore,
+    required this.description,
   });
 
   final String title;
-  final String body;
+  final int score;
+  final int maxScore;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +32,19 @@ class InsightCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.bodyEmphasis),
-          const SizedBox(height: AppSpacing.s8),
-          Text(body, style: AppTextStyles.subheadline),
+          Text(
+            '$title ($score/$maxScore)：',
+            style: AppTextStyles.bodyEmphasis,
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          Text(
+            description,
+            style: AppTextStyles.subheadline,
+          ),
         ],
       ),
     );
   }
 }
-
-
-
-
-
 
 

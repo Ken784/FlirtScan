@@ -20,8 +20,13 @@ class PageHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20, vertical: AppSpacing.s12),
       child: Row(
         children: [
-          if (leading != null) leading!,
-          if (leading != null) const SizedBox(width: AppSpacing.s16),
+          if (leading != null) ...[
+            GestureDetector(
+              onTap: () => Navigator.of(context).maybePop(),
+              child: leading!,
+            ),
+            const SizedBox(width: AppSpacing.s16),
+          ],
           Expanded(child: Text(title, style: AppTextStyles.title1)),
           if (trailing != null) trailing!,
         ],

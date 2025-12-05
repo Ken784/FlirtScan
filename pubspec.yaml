@@ -20,6 +20,9 @@ dependencies:
   
   # Icons
   flutter_svg: ^2.0.9
+  
+  # Image Picker
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
