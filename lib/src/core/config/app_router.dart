@@ -7,6 +7,7 @@ import '../../pages/result_page.dart';
 import '../../pages/result_sentence_page.dart';
 import '../../pages/history_page.dart';
 import '../../pages/error_dialog_demo_page.dart';
+import '../../pages/analysis_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -35,6 +36,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: ErrorDialogDemoPage.route,
         builder: (context, state) => const ErrorDialogDemoPage(),
+      ),
+      GoRoute(
+        path: AnalysisPage.route,
+        builder: (context, state) => const AnalysisPage(),
       ),
     ],
   );
