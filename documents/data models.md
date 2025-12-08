@@ -124,17 +124,10 @@
 
 class AnalysisRequest {
   final String userId;
-  final List<Message> messages;     // 結構化對話（OCR or 文本匯入後的整理）
-  final String locale;              // App 當前語系 (e.g., zh-TW)
-  final String sourceLanguage;      // 來源文本語言（偵測結果，e.g., zh）
-  final String chatAppType;         // 對話來源應用（e.g., line/instagram/whatsapp/unknown）
-  final bool isGroupFlag;           // 是否為群組對話（啟發式偵測，可由使用者覆寫）
-  final String ocrHash;             // 依據影像/OCR 結果計算的去重 hash
-  final String deviceId;            // 匿名裝置 ID（用於限流/防濫用）
-  final String sessionId;           // 本次分析會話 ID（追蹤一次流程）
-  final int maxKeySentences;        // 最多顯示的關鍵句（預設 20）
-  final bool preserveOriginalText;  // 是否以原文送往後端/LLM（不做摘要與遮罩），預設 true
+  final String imageBase64;    // 壓縮後的對話截圖 (Base64 String)
+  final String language;       // App 當前語言 (zh-TW)
 }
+
 
 ###B. 雷達圖維度 (RadarMetric)###
 
@@ -146,21 +139,12 @@ class RadarMetric {
 }
 
 
-
-###C. 訊息結構 (Message)###
-
-class Message {
-  final String text;             // 訊息文本（保留原文與人名，不做遮罩）
-  final Speaker speaker;         // 發話者（端上可由左右氣泡/暱稱推斷）
-  final DateTime? timestamp;     // 若可從 UI/OCR 判斷則填入，否則為 null
-}
-
-###D. 完整分析結果 (AnalysisResult) - 需支援 JSON 序列化以存入本地###
+###C. 完整分析結果 (AnalysisResult) - 需支援 JSON 序列化以存入本地###
 
 class AnalysisResult {
   final String id;
   final DateTime createdAt;      // 建立時間 (用於歷史排序)
-  final String partnerName;      // 對方名稱 (顯示在列表)
+  final String partnerName;      // 對方名稱 (由 LLM 推測或顯示為 "對方")
   
   // 雷達圖五維度
   final RadarMetric emotional;
@@ -169,33 +153,27 @@ class AnalysisResult {
   final RadarMetric responsive;
   final RadarMetric balance;
   
-  final double totalScore;       // 總分
-  final String summary;          // 總結
+  final double totalScore;       // 總分 (對應圖中的 9/10)
+  final String relationshipStatus; // 關係狀態短語 (如: "準告白狀態", "純屬路人") - 對應圖中分數旁的文字
+  final String summary;          // 總結 (包含 Bullet points)
   final String toneInsight;      // 語氣洞察
-  final String wittyConclusion;  // 金句
+  final String wittyConclusion;  // 金句 (可選保留或用於分享頁)
   
-  final List<SentenceAnalysis> sentences; // 逐句分析
+  // 進階分析相關
+  final List<SentenceAnalysis> sentences; // 逐句分析列表
+  final String advancedSummary;  // 進階頁面底部的總結 (對應截圖紫色區塊)
   
   // 狀態標記
   final bool isAdvancedUnlocked; // 是否已解鎖進階分析 (看過廣告)
-
-  // 追蹤/合規/版本化
-  final String modelVersion;     // 模型與提示版本，例如 "fs-radar-v1.0"
-  final String sourceLanguage;   // 來源文本語言（偵測結果）
-  final String chatAppType;      // 對話來源應用
-  final int processingTimeMs;    // 端到端處理時間（毫秒）
-  final List<String> moderationFlags; // 安全/審核標記（e.g., bullying, sexual, profanity）
-  final String? shareImagePath;  // 生成的分享長圖本地路徑（若已生成）
-  final String ocrHash;          // 對應分析輸入的去重 hash
-  final String? adUnlockToken;   // 廣告 SSV 核銷憑證（或核銷紀錄 ID）
-  final String locale;           // 本次渲染/輸出所用語系（e.g., zh-TW）
 }
 
-###E. 逐句分析 (SentenceAnalysis)###
+
+###D. 逐句分析 (SentenceAnalysis)###
+
 enum Speaker { me, partner, unknown }
 
 class SentenceAnalysis {
-  final String originalText;     // 原始對話內容
+  final String originalText;     // 原始對話內容 (由 LLM 視覺辨識)
   final Speaker speaker;         // 發話者
   final String hiddenMeaning;    // 背後含意 (潛台詞)
   final int flirtScore;          // 1-10 星 (換算成 20%-100%)

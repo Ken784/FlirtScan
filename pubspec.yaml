@@ -23,6 +23,12 @@ dependencies:
   
   # Image Picker
   image_picker: ^1.0.7
+  
+  # Image Compression
+  flutter_image_compress: ^2.1.0
+  
+  # Path Provider (for temporary file storage)
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

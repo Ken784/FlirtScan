@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
@@ -11,6 +10,7 @@ import '../widgets/navigation/page_header.dart';
 import '../widgets/upload/upload_card.dart';
 import '../widgets/navigation/bottom_nav.dart';
 import '../widgets/buttons/app_button.dart';
+import '../services/image_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,26 +23,66 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _navIndex = 0;
   File? _selectedImage;
-  final ImagePicker _picker = ImagePicker();
+  String? _preparedBase64String;
+  bool _isProcessing = false;
+  final ImageService _imageService = ImageService();
 
   Future<void> _pickImage() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
+      // 使用 ImageService 選取圖片（會檢查檔案大小）
+      final File? imageFile = await _imageService.pickImage();
       
-      if (image != null) {
+      if (imageFile != null) {
+        // 立即更新 UI 顯示原始圖片
         setState(() {
-          _selectedImage = File(image.path);
+          _selectedImage = imageFile;
+          _preparedBase64String = null; // 重置 Base64
+          _isProcessing = true;
         });
+        
+        // 非同步執行壓縮與 Base64 轉換
+        _compressAndPrepareImage(imageFile);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('選取圖片時發生錯誤：$e')),
+          SnackBar(
+            content: Text('選取圖片時發生錯誤：$e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 非同步壓縮圖片並轉換為 Base64
+  Future<void> _compressAndPrepareImage(File imageFile) async {
+    try {
+      final ImageProcessResult result = await _imageService.compressAndConvertToBase64(imageFile);
+      
+      // 在 Console 印出 Base64 前 100 個字元
+      final String preview = result.base64String.length > 100 
+          ? result.base64String.substring(0, 100) 
+          : result.base64String;
+      debugPrint('HomePage: Base64 前 100 個字元: $preview');
+      
+      if (mounted) {
+        setState(() {
+          _preparedBase64String = result.base64String;
+          _isProcessing = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('HomePage: 壓縮圖片時發生錯誤 - $e');
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('處理圖片時發生錯誤：$e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -51,7 +91,31 @@ class _HomePageState extends State<HomePage> {
   void _removeImage() {
     setState(() {
       _selectedImage = null;
+      _preparedBase64String = null;
+      _isProcessing = false;
     });
+  }
+
+  /// 顯示全螢幕圖片預覽
+  void _showImagePreview() {
+    if (_selectedImage == null) return;
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.file(_selectedImage!),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -126,27 +190,47 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
       children: [
         const SizedBox(height: AppSpacing.s24),
-        // 圖片預覽卡片
+        // 圖片預覽卡片（可點擊預覽）
         Stack(
           children: [
-            Container(
-              height: 416,
-              decoration: BoxDecoration(
-                color: Colors.white, // 白色背景
-                borderRadius: AppRadii.image,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 8,
+            GestureDetector(
+              onTap: _showImagePreview,
+              child: Container(
+                height: 416,
+                decoration: BoxDecoration(
+                  color: Colors.white, // 白色背景
+                  borderRadius: AppRadii.image,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 8,
+                  ),
+                  boxShadow: AppShadow.card,
                 ),
-                boxShadow: AppShadow.card,
-              ),
-              child: ClipRRect(
-                borderRadius: AppRadii.image,
-                child: Image.file(
-                  _selectedImage!,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: AppRadii.image,
+                      child: Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    ),
+                    // 處理中遮罩
+                    if (_isProcessing)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: AppRadii.image,
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -176,13 +260,36 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         const SizedBox(height: AppSpacing.s24),
+        // 處理狀態提示
+        if (_isProcessing)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
+            child: Text(
+              '正在處理圖片...',
+              style: AppTextStyles.callout.copyWith(color: AppColors.textBlack80),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else if (_preparedBase64String != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
+            child: Text(
+              '圖片已準備完成，可以開始分析',
+              style: AppTextStyles.callout.copyWith(color: AppColors.success),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        const SizedBox(height: AppSpacing.s16),
         // 開始分析按鈕
         AppButton(
           label: '開始分析對話',
           variant: AppButtonVariant.primary,
-          onPressed: () {
-            // TODO: 導航到分析結果頁面
-          },
+          onPressed: _preparedBase64String != null && !_isProcessing
+              ? () {
+                  // TODO: 使用 _preparedBase64String 導航到分析結果頁面
+                  debugPrint('準備上傳 Base64 字串（長度：${_preparedBase64String!.length}）');
+                }
+              : null, // 未準備完成時禁用按鈕
         ),
         const SizedBox(height: AppSpacing.s16),
         // 說明文字
