@@ -23,7 +23,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: ResultPage.route,
-        builder: (context, state) => const ResultPage(),
+        builder: (context, state) {
+          final imageBase64 = state.uri.queryParameters['imageBase64'];
+          return ResultPage(imageBase64: imageBase64);
+        },
       ),
       GoRoute(
         path: ResultSentencePage.route,

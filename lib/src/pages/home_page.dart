@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
@@ -13,7 +14,7 @@ import '../widgets/buttons/app_button.dart';
 import '../services/image_service.dart';
 import '../services/analysis_service.dart';
 import '../core/models/analysis_result.dart';
-import '../pages/analysis_page.dart';
+import 'result_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -122,12 +123,10 @@ class _HomePageState extends State<HomePage> {
       debugPrint('分析完成！總分: ${analysisResult.totalScore}/10');
       debugPrint('關係狀態: ${analysisResult.relationshipStatus}');
 
-      // 導航到分析頁面
+      // 導航到結果頁面（傳遞圖片數據）
       if (mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AnalysisPage(),
-          ),
+        context.push(
+          '${ResultPage.route}?imageBase64=${Uri.encodeComponent(_preparedBase64String!)}',
         );
       }
     } on AnalysisException catch (e) {
