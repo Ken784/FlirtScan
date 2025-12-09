@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "190233405672",
+    "project_id": "flirtscan-2025-ee6d7",
+    "storage_bucket": "flirtscan-2025-ee6d7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190233405672:android:e4423cc62c8e46f066c15d",
+        "android_client_info": {
+          "package_name": "com.kenhuang.flirtscan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFCoOBam7NvR68hnaC2EbRSQkR7ceMHAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

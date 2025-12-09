@@ -4,8 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flirt_scan/l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/config/app_router.dart';
+import 'src/core/config/firebase_config.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 初始化 Firebase
+  await FirebaseConfig.initialize();
+  
   runApp(
     const ProviderScope(
       child: FlirtScanApp(),

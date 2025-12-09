@@ -29,6 +29,10 @@ dependencies:
   
   # Path Provider (for temporary file storage)
   path_provider: ^2.1.1
+  
+  # Firebase
+  firebase_core: ^2.24.0
+  cloud_functions: ^4.6.0
 
 dev_dependencies:
   flutter_test:

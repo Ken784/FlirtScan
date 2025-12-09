@@ -11,6 +11,9 @@ import '../widgets/upload/upload_card.dart';
 import '../widgets/navigation/bottom_nav.dart';
 import '../widgets/buttons/app_button.dart';
 import '../services/image_service.dart';
+import '../services/analysis_service.dart';
+import '../core/models/analysis_result.dart';
+import '../pages/analysis_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,7 +28,9 @@ class _HomePageState extends State<HomePage> {
   File? _selectedImage;
   String? _preparedBase64String;
   bool _isProcessing = false;
+  bool _isAnalyzing = false;
   final ImageService _imageService = ImageService();
+  final AnalysisService _analysisService = AnalysisService();
 
   Future<void> _pickImage() async {
     try {
@@ -93,7 +98,65 @@ class _HomePageState extends State<HomePage> {
       _selectedImage = null;
       _preparedBase64String = null;
       _isProcessing = false;
+      _isAnalyzing = false;
     });
+  }
+
+  /// 開始分析對話
+  Future<void> _startAnalysis() async {
+    if (_preparedBase64String == null || _isAnalyzing) return;
+
+    setState(() {
+      _isAnalyzing = true;
+    });
+
+    try {
+      debugPrint('準備上傳 Base64 字串（長度：${_preparedBase64String!.length}）');
+      
+      // 呼叫分析服務
+      final analysisResult = await _analysisService.analyzeConversation(
+        imageBase64: _preparedBase64String!,
+        language: 'zh-TW',
+      );
+
+      debugPrint('分析完成！總分: ${analysisResult.totalScore}/10');
+      debugPrint('關係狀態: ${analysisResult.relationshipStatus}');
+
+      // 導航到分析頁面
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const AnalysisPage(),
+          ),
+        );
+      }
+    } on AnalysisException catch (e) {
+      debugPrint('分析錯誤: ${e.message}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('未知錯誤: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('分析失敗: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+      }
+    }
   }
 
   /// 顯示全螢幕圖片預覽
@@ -270,6 +333,15 @@ class _HomePageState extends State<HomePage> {
               textAlign: TextAlign.center,
             ),
           )
+        else if (_isAnalyzing)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
+            child: Text(
+              '正在分析對話...',
+              style: AppTextStyles.callout.copyWith(color: AppColors.textBlack80),
+              textAlign: TextAlign.center,
+            ),
+          )
         else if (_preparedBase64String != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
@@ -282,13 +354,10 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: AppSpacing.s16),
         // 開始分析按鈕
         AppButton(
-          label: '開始分析對話',
+          label: _isAnalyzing ? '分析中...' : '開始分析對話',
           variant: AppButtonVariant.primary,
-          onPressed: _preparedBase64String != null && !_isProcessing
-              ? () {
-                  // TODO: 使用 _preparedBase64String 導航到分析結果頁面
-                  debugPrint('準備上傳 Base64 字串（長度：${_preparedBase64String!.length}）');
-                }
+          onPressed: _preparedBase64String != null && !_isProcessing && !_isAnalyzing
+              ? _startAnalysis
               : null, // 未準備完成時禁用按鈕
         ),
         const SizedBox(height: AppSpacing.s16),
