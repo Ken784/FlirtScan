@@ -108,6 +108,48 @@ abstract class AppLocalizations {
   /// In zh_TW, this message translates to:
   /// **'曖昧分析'**
   String get homePageTitle;
+
+  /// 分析中提示文字
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'正在揣摩他/她的心思'**
+  String get analyzing;
+
+  /// 錯誤對話框標題
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'分析失敗'**
+  String get errorTitle;
+
+  /// 非一對一對話錯誤訊息
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'請上傳一對一對話截圖'**
+  String get errorNotOneOnOneChat;
+
+  /// 廣告載入失敗錯誤訊息
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'廣告載入失敗，請稍後再試'**
+  String get errorAdNotLoaded;
+
+  /// 分析失敗錯誤訊息
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'分析過程發生錯誤，請重試'**
+  String get errorAnalysisFailed;
+
+  /// 確定按鈕
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'確定'**
+  String get ok;
+
+  /// 重試按鈕
+  ///
+  /// In zh_TW, this message translates to:
+  /// **'重試'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate

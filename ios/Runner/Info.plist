@@ -49,5 +49,14 @@
 	<string>需要存取相冊以選取對話截圖進行分析</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>需要存取相冊以選取對話截圖進行分析</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 </dict>
 </plist>

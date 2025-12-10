@@ -1,10 +1,11 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../core/icons/app_icon_widgets.dart';
+import '../core/providers/analysis_provider.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/cards/score_summary_card.dart';
 import '../widgets/cards/insight_card.dart';
@@ -13,11 +14,9 @@ import '../widgets/charts/fl_radar_chart.dart';
 import '../widgets/charts/radar_chart.dart';
 import '../widgets/buttons/app_button.dart';
 import '../core/models/analysis_result.dart';
-import '../features/analysis/analysis_repository.dart';
-import '../services/analysis_service.dart';
 import 'result_sentence_page.dart';
 
-class ResultPage extends StatefulWidget {
+class ResultPage extends ConsumerStatefulWidget {
   const ResultPage({
     super.key,
     this.imageBase64,
@@ -27,15 +26,11 @@ class ResultPage extends StatefulWidget {
   final String? imageBase64;
 
   @override
-  State<ResultPage> createState() => _ResultPageState();
+  ConsumerState<ResultPage> createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage>
+class _ResultPageState extends ConsumerState<ResultPage>
     with SingleTickerProviderStateMixin {
-  final AnalysisRepository _repository = AnalysisRepository();
-  AnalysisResult? _analysisResult;
-  bool _isAnalyzing = false;
-  String? _errorMessage;
   late AnimationController _scanAnimationController;
   late Animation<double> _scanAnimation;
   final ValueNotifier<bool> _isMovingRightNotifier = ValueNotifier<bool>(true);
@@ -69,10 +64,8 @@ class _ResultPageState extends State<ResultPage>
       _previousAnimationValue = currentValue;
     });
 
-    // 如果有圖片數據，開始分析
-    if (widget.imageBase64 != null) {
-      _startAnalysis();
-    }
+    // 不需要在這裡開始分析，因為 AnalysisPage 已經開始了
+    // ResultPage 只需要監聽 analysisProvider 的狀態
   }
 
   @override
@@ -82,63 +75,25 @@ class _ResultPageState extends State<ResultPage>
     super.dispose();
   }
 
-  Future<void> _startAnalysis() async {
-    if (widget.imageBase64 == null || _isAnalyzing) return;
 
-    setState(() {
-      _isAnalyzing = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final result = await _repository.analyzeConversation(
-        imageBase64: widget.imageBase64!,
-        language: 'zh-TW',
-      );
-
-      if (mounted) {
-        setState(() {
-          _analysisResult = result;
-          _isAnalyzing = false;
-        });
-      }
-    } on AnalysisException catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.message;
-          _isAnalyzing = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = '分析失敗: ${e.toString()}';
-          _isAnalyzing = false;
-        });
-      }
-    }
-  }
-
-  void _onRadarPointTapped(int index, RadarDataPoint point) {
-    if (_analysisResult == null) return;
-
+  void _onRadarPointTapped(int index, RadarDataPoint point, AnalysisResult result) {
     // 根據索引獲取對應的維度描述
     String description = '';
     switch (index) {
       case 0:
-        description = _analysisResult!.emotional.description;
+        description = result.emotional.description;
         break;
       case 1:
-        description = _analysisResult!.intimacy.description;
+        description = result.intimacy.description;
         break;
       case 2:
-        description = _analysisResult!.playfulness.description;
+        description = result.playfulness.description;
         break;
       case 3:
-        description = _analysisResult!.responsive.description;
+        description = result.responsive.description;
         break;
       case 4:
-        description = _analysisResult!.balance.description;
+        description = result.balance.description;
         break;
     }
 
@@ -160,6 +115,9 @@ class _ResultPageState extends State<ResultPage>
 
   @override
   Widget build(BuildContext context) {
+    // 監聽分析狀態
+    final analysisState = ref.watch(analysisProvider);
+    
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -170,12 +128,12 @@ class _ResultPageState extends State<ResultPage>
           ),
         ),
         child: SafeArea(
-          child: _isAnalyzing
+          child: analysisState.isAnalyzing
               ? _buildAnalyzingView()
-              : _errorMessage != null
-                  ? _buildErrorView()
-                  : _analysisResult != null
-                      ? _buildResultView()
+              : analysisState.hasError
+                  ? _buildErrorView(analysisState.errorMessage)
+                  : analysisState.result != null
+                      ? _buildResultView(analysisState.result!)
                       : _buildEmptyView(),
         ),
       ),
@@ -249,7 +207,7 @@ class _ResultPageState extends State<ResultPage>
     );
   }
 
-  Widget _buildErrorView() {
+  Widget _buildErrorView(String? errorMessage) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
@@ -275,15 +233,15 @@ class _ResultPageState extends State<ResultPage>
               ),
               const SizedBox(height: AppSpacing.s8),
               Text(
-                _errorMessage ?? '未知錯誤',
+                errorMessage ?? '未知錯誤',
                 style: AppTextStyles.subheadline,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.s24),
               AppButton(
-                label: '重新分析',
+                label: '返回',
                 variant: AppButtonVariant.primary,
-                onPressed: _startAnalysis,
+                onPressed: () => context.pop(),
               ),
             ],
           ),
@@ -316,8 +274,7 @@ class _ResultPageState extends State<ResultPage>
     );
   }
 
-  Widget _buildResultView() {
-    final result = _analysisResult!;
+  Widget _buildResultView(AnalysisResult result) {
     
     // 準備雷達圖數據（保持 0-1 的值，讓 fl_chart 內部轉換為 0-10）
     // fl_chart 會將 value * 10 來顯示在圖表上
@@ -433,7 +390,7 @@ class _ResultPageState extends State<ResultPage>
                 child: FlRadarChart(
                   dataPoints: radarDataPoints,
                   size: 230,
-                  onPointTapped: _onRadarPointTapped,
+                  onPointTapped: (index, point) => _onRadarPointTapped(index, point, result),
                 ),
               ),
               const SizedBox(height: AppSpacing.s32),

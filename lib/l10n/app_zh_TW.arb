@@ -7,6 +7,34 @@
   "homePageTitle": "曖昧分析",
   "@homePageTitle": {
     "description": "首頁標題"
+  },
+  "analyzing": "正在揣摩他/她的心思",
+  "@analyzing": {
+    "description": "分析中提示文字"
+  },
+  "errorTitle": "分析失敗",
+  "@errorTitle": {
+    "description": "錯誤對話框標題"
+  },
+  "errorNotOneOnOneChat": "請上傳一對一對話截圖",
+  "@errorNotOneOnOneChat": {
+    "description": "非一對一對話錯誤訊息"
+  },
+  "errorAdNotLoaded": "廣告載入失敗，請稍後再試",
+  "@errorAdNotLoaded": {
+    "description": "廣告載入失敗錯誤訊息"
+  },
+  "errorAnalysisFailed": "分析過程發生錯誤，請重試",
+  "@errorAnalysisFailed": {
+    "description": "分析失敗錯誤訊息"
+  },
+  "ok": "確定",
+  "@ok": {
+    "description": "確定按鈕"
+  },
+  "retry": "重試",
+  "@retry": {
+    "description": "重試按鈕"
   }
 }
 

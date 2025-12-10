@@ -1,37 +1,40 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flirt_scan/l10n/app_localizations.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../core/theme/app_radii.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/icons/app_icon_widgets.dart';
+import '../core/providers/error_provider.dart';
+import '../core/providers/analysis_provider.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/upload/upload_card.dart';
 import '../widgets/navigation/bottom_nav.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/error_dialog.dart';
 import '../services/image_service.dart';
-import '../services/analysis_service.dart';
-import '../core/models/analysis_result.dart';
+import '../services/ad_service.dart';
 import 'result_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
   static const String route = '/';
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _navIndex = 0;
   File? _selectedImage;
   String? _preparedBase64String;
   bool _isProcessing = false;
   bool _isAnalyzing = false;
   final ImageService _imageService = ImageService();
-  final AnalysisService _analysisService = AnalysisService();
 
   Future<void> _pickImage() async {
     try {
@@ -112,50 +115,71 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      debugPrint('準備上傳 Base64 字串（長度：${_preparedBase64String!.length}）');
+      debugPrint('準備開始分析（圖片長度：${_preparedBase64String!.length}）');
       
-      // 呼叫分析服務
-      final analysisResult = await _analysisService.analyzeConversation(
-        imageBase64: _preparedBase64String!,
-        language: 'zh-TW',
-      );
+      // 使用 analysisProvider 開始背景分析
+      ref.read(analysisProvider.notifier).analyze(_preparedBase64String!);
 
-      debugPrint('分析完成！總分: ${analysisResult.totalScore}/10');
-      debugPrint('關係狀態: ${analysisResult.relationshipStatus}');
-
-      // 導航到結果頁面（傳遞圖片數據）
-      if (mounted) {
-        context.push(
-          '${ResultPage.route}?imageBase64=${Uri.encodeComponent(_preparedBase64String!)}',
-        );
-      }
-    } on AnalysisException catch (e) {
-      debugPrint('分析錯誤: ${e.message}');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // 播放全螢幕廣告
+      await _showAd();
+      
+      setState(() {
+        _isAnalyzing = false;
+      });
     } catch (e) {
-      debugPrint('未知錯誤: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('分析失敗: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
+      debugPrint('分析錯誤: $e');
       if (mounted) {
         setState(() {
           _isAnalyzing = false;
         });
+        ref.read(errorProvider.notifier).showError(
+          '發生錯誤: ${e.toString()}',
+          title: AppLocalizations.of(context)!.errorTitle,
+        );
       }
     }
+  }
+
+  /// 顯示全螢幕獎勵廣告
+  Future<void> _showAd() async {
+    final adService = AdService();
+    
+    // 檢查廣告是否已載入
+    if (!adService.isAdLoaded) {
+      // 廣告未載入，顯示錯誤
+      if (mounted) {
+        ref.read(errorProvider.notifier).showError(
+          AppLocalizations.of(context)!.errorAdNotLoaded,
+          title: AppLocalizations.of(context)!.errorTitle,
+        );
+      }
+      return;
+    }
+
+    // 顯示全螢幕獎勵廣告
+    await adService.showRewardedAd(
+      onUserEarnedReward: () {
+        // 用戶看完廣告，跳轉到 ResultPage
+        debugPrint('廣告播放完成，跳轉到結果頁面');
+        if (mounted) {
+          context.push(
+            '${ResultPage.route}?imageBase64=${Uri.encodeComponent(_preparedBase64String!)}',
+          );
+        }
+      },
+      onAdDismissed: () {
+        debugPrint('廣告被關閉');
+      },
+      onAdFailedToShow: () {
+        // 廣告播放失敗
+        if (mounted) {
+          ref.read(errorProvider.notifier).showError(
+            AppLocalizations.of(context)!.errorAdNotLoaded,
+            title: AppLocalizations.of(context)!.errorTitle,
+          );
+        }
+      },
+    );
   }
 
   /// 顯示全螢幕圖片預覽
@@ -182,36 +206,80 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.bgGradientTop, AppColors.bgGradientBottom],
+    // 監聽錯誤狀態
+    final errorState = ref.watch(errorProvider);
+    
+    // 監聽分析錯誤（必須在 build 方法中）
+    ref.listen<AnalysisState>(analysisProvider, (previous, next) {
+      if (next.hasError && mounted && !errorState.hasError) {
+        // 只在還沒有錯誤時才顯示新錯誤
+        ref.read(errorProvider.notifier).showError(
+          next.errorMessage ?? AppLocalizations.of(context)!.errorAnalysisFailed,
+          title: AppLocalizations.of(context)!.errorTitle,
+        );
+        setState(() {
+          _isAnalyzing = false;
+        });
+      }
+    });
+    
+    return Stack(
+      children: [
+        // 主要內容
+        Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.bgGradientTop, AppColors.bgGradientBottom],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // 標題欄
+                  PageHeader(
+                    title: '曖昧分析',
+                    leading: AppIconWidgets.heartOutline(size: 24),
+                  ),
+                  // 主要內容區域
+                  Expanded(
+                    child: _selectedImage == null
+                        ? _buildInitialState()
+                        : _buildImagePreviewState(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          bottomNavigationBar: BottomNav(
+            currentIndex: _navIndex,
+            onTap: (i) => setState(() => _navIndex = i),
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // 標題欄
-              PageHeader(
-                title: '曖昧分析',
-                leading: AppIconWidgets.heartOutline(size: 24),
-              ),
-              // 主要內容區域
-              Expanded(
-                child: _selectedImage == null
-                    ? _buildInitialState()
-                    : _buildImagePreviewState(),
-              ),
-            ],
-          ),
+        
+        // 錯誤遮罩和對話框
+        if (errorState.hasError)
+          _buildErrorOverlay(errorState),
+      ],
+    );
+  }
+
+  /// 建立錯誤遮罩
+  Widget _buildErrorOverlay(ErrorState errorState) {
+    return Container(
+      color: Colors.black.withOpacity(0.5), // 黑色半透明遮罩
+      child: Center(
+        child: ErrorDialog(
+          title: errorState.title ?? AppLocalizations.of(context)!.errorTitle,
+          message: errorState.message!,
+          buttonText: AppLocalizations.of(context)!.ok,
+          onPressed: () {
+            // 清除錯誤，關閉遮罩
+            ref.read(errorProvider.notifier).clearError();
+          },
         ),
-      ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: _navIndex,
-        onTap: (i) => setState(() => _navIndex = i),
       ),
     );
   }
