@@ -88,6 +88,14 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
   void reset() {
     state = AnalysisState();
   }
+
+  /// 解鎖進階分析
+  void unlockAdvancedAnalysis() {
+    if (state.result != null) {
+      final updatedResult = state.result!.copyWith(isAdvancedUnlocked: true);
+      state = state.copyWith(result: updatedResult);
+    }
+  }
 }
 
 /// 分析狀態 Provider

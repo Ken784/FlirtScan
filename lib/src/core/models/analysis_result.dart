@@ -177,5 +177,44 @@ class AnalysisResult {
       'isAdvancedUnlocked': isAdvancedUnlocked,
     };
   }
+
+  /// 複製並更新部分欄位
+  AnalysisResult copyWith({
+    String? id,
+    DateTime? createdAt,
+    String? partnerName,
+    RadarMetric? emotional,
+    RadarMetric? intimacy,
+    RadarMetric? playfulness,
+    RadarMetric? responsive,
+    RadarMetric? balance,
+    double? totalScore,
+    String? relationshipStatus,
+    String? summary,
+    String? toneInsight,
+    String? wittyConclusion,
+    List<SentenceAnalysis>? sentences,
+    String? advancedSummary,
+    bool? isAdvancedUnlocked,
+  }) {
+    return AnalysisResult(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      partnerName: partnerName ?? this.partnerName,
+      emotional: emotional ?? this.emotional,
+      intimacy: intimacy ?? this.intimacy,
+      playfulness: playfulness ?? this.playfulness,
+      responsive: responsive ?? this.responsive,
+      balance: balance ?? this.balance,
+      totalScore: totalScore ?? this.totalScore,
+      relationshipStatus: relationshipStatus ?? this.relationshipStatus,
+      summary: summary ?? this.summary,
+      toneInsight: toneInsight ?? this.toneInsight,
+      wittyConclusion: wittyConclusion ?? this.wittyConclusion,
+      sentences: sentences ?? this.sentences,
+      advancedSummary: advancedSummary ?? this.advancedSummary,
+      isAdvancedUnlocked: isAdvancedUnlocked ?? this.isAdvancedUnlocked,
+    );
+  }
 }
 

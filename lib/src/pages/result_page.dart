@@ -14,6 +14,7 @@ import '../widgets/charts/fl_radar_chart.dart';
 import '../widgets/charts/radar_chart.dart';
 import '../widgets/buttons/app_button.dart';
 import '../core/models/analysis_result.dart';
+import '../services/ad_service.dart';
 import 'result_sentence_page.dart';
 
 class ResultPage extends ConsumerStatefulWidget {
@@ -35,6 +36,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
   late Animation<double> _scanAnimation;
   final ValueNotifier<bool> _isMovingRightNotifier = ValueNotifier<bool>(true);
   double _previousAnimationValue = 0.0;
+  final AdService _adService = AdService();
+  bool _isLoadingAd = false;
 
   @override
   void initState() {
@@ -111,6 +114,94 @@ class _ResultPageState extends ConsumerState<ResultPage>
         ],
       ),
     );
+  }
+
+  /// 處理進階分析按鈕點擊
+  Future<void> _handleAdvancedAnalysis(AnalysisResult result) async {
+    // 檢查是否已解鎖
+    if (result.isAdvancedUnlocked) {
+      // 已解鎖，直接跳轉
+      _navigateToAdvancedAnalysis();
+      return;
+    }
+
+    // 未解鎖，需要播放廣告
+    setState(() {
+      _isLoadingAd = true;
+    });
+
+    // 檢查廣告是否已載入
+    if (!_adService.isAdLoaded) {
+      // 顯示載入提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('廣告載入中，請稍候...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // 等待廣告載入
+      await _adService.loadRewardedAd();
+      
+      // 再次檢查廣告是否載入成功
+      if (!_adService.isAdLoaded) {
+        if (mounted) {
+          setState(() {
+            _isLoadingAd = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('廣告載入失敗，請稍後再試'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    // 播放廣告
+    await _adService.showRewardedAd(
+      onUserEarnedReward: () {
+        // 用戶看完廣告，解鎖進階分析
+        debugPrint('ResultPage: 用戶看完廣告，解鎖進階分析');
+        ref.read(analysisProvider.notifier).unlockAdvancedAnalysis();
+        
+        // 跳轉到進階分析頁面
+        if (mounted) {
+          _navigateToAdvancedAnalysis();
+        }
+      },
+      onAdDismissed: () {
+        // 廣告關閉
+        if (mounted) {
+          setState(() {
+            _isLoadingAd = false;
+          });
+        }
+      },
+      onAdFailedToShow: () {
+        // 廣告播放失敗
+        if (mounted) {
+          setState(() {
+            _isLoadingAd = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('廣告播放失敗，請稍後再試'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  /// 跳轉到進階分析頁面
+  void _navigateToAdvancedAnalysis() {
+    context.push(ResultSentencePage.route);
   }
 
   @override
@@ -440,10 +531,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
           label: '進階逐句分析',
           variant: AppButtonVariant.primary,
           leading: AppIconWidgets.list(size: 24, color: Colors.white),
-          onPressed: () {
-            // TODO: 傳遞分析結果到逐句分析頁面
-            context.push(ResultSentencePage.route);
-          },
+          onPressed: _isLoadingAd ? null : () => _handleAdvancedAnalysis(result),
         ),
         const SizedBox(height: AppSpacing.s16),
         AppButton(

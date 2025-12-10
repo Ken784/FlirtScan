@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/icons/app_icon_widgets.dart';
+import '../core/providers/analysis_provider.dart';
+import '../core/models/analysis_result.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/cards/quote_analysis_card.dart';
+import '../widgets/cards/advanced_summary_card.dart';
 import '../widgets/buttons/app_button.dart';
 
-class ResultSentencePage extends StatelessWidget {
+class ResultSentencePage extends ConsumerWidget {
   const ResultSentencePage({super.key});
   static const String route = '/result-sentence';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisState = ref.watch(analysisProvider);
+    final result = analysisState.result;
+
+    // 如果沒有分析結果，顯示錯誤頁面
+    if (result == null) {
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.bgGradientTop, AppColors.bgGradientBottom],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('沒有分析結果'),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    label: '返回',
+                    variant: AppButtonVariant.primary,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -23,51 +61,50 @@ class ResultSentencePage extends StatelessWidget {
         ),
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
             children: [
               PageHeader(title: '逐句分析', leading: AppIconWidgets.arrowBack()),
               const SizedBox(height: AppSpacing.s16),
-              const QuoteAnalysisCard(
-                side: QuoteSide.opponent,
-                quote: '幹...我快氣到哭 全部都老一滴血輸掉ㄟ🥲',
-                meaning: '對方在抱怨輸遊戲、情緒很真實，語氣放輕鬆像在和熟人撒嬌。',
-                rating: 2,
-                ratingPercent: 20,
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              const QuoteAnalysisCard(
-                side: QuoteSide.me,
-                quote: '學妹要不要玩遊戲 ❤️',
-                meaning: '主動邀約、加上❤️，是明顯試探；稱呼「學妹」營造一種角色關係（有趣＋親密）。',
-                rating: 7,
-                ratingPercent: 70,
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              const QuoteAnalysisCard(
-                side: QuoteSide.opponent,
-                quote: '好啊哈哈哈',
-                meaning: '表面輕鬆回應，但沒有拒絕對方的邀約，保留了繼續互動的空間。',
-                rating: 5,
-                ratingPercent: 50,
-              ),
+              
+              // 逐句分析卡片 - 根據發話者對齊
+              ...result.sentences.asMap().entries.map((entry) {
+                final sentence = entry.value;
+                final isLastItem = entry.key == result.sentences.length - 1;
+                final isMe = sentence.speaker == Speaker.me;
+                
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: isLastItem ? 0 : AppSpacing.s16,
+                    // Partner 左對齊，Me 右對齊
+                    left: isMe ? AppSpacing.s24 : 0,
+                    right: isMe ? 0 : AppSpacing.s24,
+                  ),
+                  child: QuoteAnalysisCard(
+                    side: isMe ? QuoteSide.me : QuoteSide.opponent,
+                    quote: sentence.originalText,
+                    meaning: sentence.hiddenMeaning,
+                    rating: sentence.flirtScore,
+                    ratingPercent: (sentence.flirtScore * 10).clamp(0, 100),
+                    reason: sentence.scoreReason,
+                  ),
+                );
+              }),
+              
               const SizedBox(height: AppSpacing.s24),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade600,
-                  borderRadius: const BorderRadius.all(Radius.circular(24)),
-                ),
-                padding: const EdgeInsets.all(AppSpacing.s24),
-                child: const Text(
-                  '✨ 總結\n從這些對話可以看出，你們之間存在超越普通朋友的情感連結。',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              
+              // 進階總結卡片
+              AdvancedSummaryCard(summary: result.advancedSummary),
+              
               const SizedBox(height: AppSpacing.s24),
+              
+              // 截圖按鈕
               AppButton(
                 label: '截圖',
                 variant: AppButtonVariant.primary,
                 leading: AppIconWidgets.camera(size: 24, color: Colors.white),
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: 實作截圖功能
+                },
               ),
             ],
           ),
