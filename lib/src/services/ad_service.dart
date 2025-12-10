@@ -13,6 +13,9 @@ class AdService {
   
   final _adLoadedController = StreamController<bool>.broadcast();
   Stream<bool> get adLoadedStream => _adLoadedController.stream;
+  
+  // 用於中斷廣告的回調
+  VoidCallback? _onAdInterrupted;
 
   // 測試廣告單元 ID（Android 和 iOS）
   static String get rewardedAdUnitId {
@@ -82,10 +85,12 @@ class AdService {
   /// 顯示獎勵廣告
   /// [onUserEarnedReward] 當用戶看完廣告獲得獎勵時調用
   /// [onAdDismissed] 當廣告被關閉時調用（無論是否獲得獎勵）
+  /// [onAdInterrupted] 當廣告被中斷時調用（用於錯誤處理）
   Future<void> showRewardedAd({
     required VoidCallback onUserEarnedReward,
     VoidCallback? onAdDismissed,
     VoidCallback? onAdFailedToShow,
+    VoidCallback? onAdInterrupted,
   }) async {
     if (_rewardedAd == null || !_isAdLoaded) {
       // 廣告未載入
@@ -94,6 +99,7 @@ class AdService {
     }
 
     bool hasEarnedReward = false;
+    _onAdInterrupted = onAdInterrupted;
 
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdShowedFullScreenContent: (ad) {
@@ -104,6 +110,7 @@ class AdService {
         ad.dispose();
         _rewardedAd = null;
         _isAdLoaded = false;
+        _onAdInterrupted = null;
         
         // 先調用 dismiss callback
         onAdDismissed?.call();
@@ -121,6 +128,7 @@ class AdService {
         ad.dispose();
         _rewardedAd = null;
         _isAdLoaded = false;
+        _onAdInterrupted = null;
         onAdFailedToShow?.call();
         // 嘗試重新載入
         loadRewardedAd();
@@ -132,6 +140,21 @@ class AdService {
         hasEarnedReward = true;
       },
     );
+  }
+  
+  /// 中斷廣告播放（用於錯誤處理）
+  void interruptAd() {
+    if (_isAdShowing && _rewardedAd != null) {
+      debugPrint('AdService: 中斷廣告播放');
+      // 調用中斷回調
+      _onAdInterrupted?.call();
+      _onAdInterrupted = null;
+      
+      // 關閉廣告（這會觸發 onAdDismissedFullScreenContent）
+      // 注意：Google Mobile Ads SDK 沒有直接的 dismiss 方法
+      // 我們只能通過回調來處理
+      _isAdShowing = false;
+    }
   }
 
   /// 檢查廣告是否已載入

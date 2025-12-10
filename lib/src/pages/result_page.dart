@@ -118,6 +118,15 @@ class _ResultPageState extends ConsumerState<ResultPage>
     // 監聽分析狀態
     final analysisState = ref.watch(analysisProvider);
     
+    // 監聽分析錯誤，如果有錯誤則返回 HomePage
+    ref.listen<AnalysisState>(analysisProvider, (previous, next) {
+      if (next.hasError && mounted) {
+        debugPrint('ResultPage: 偵測到分析錯誤，返回 HomePage');
+        // 返回 HomePage
+        context.pop();
+      }
+    });
+    
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(

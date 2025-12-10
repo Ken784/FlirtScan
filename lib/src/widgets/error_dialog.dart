@@ -42,80 +42,72 @@ class ErrorDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        width: 270,
+        width: 249,
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E), // 深灰色背景
-          borderRadius: BorderRadius.circular(14),
+          color: Colors.white, // 白色背景（根據 Figma 設計）
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // 標題區域
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 19,
-                left: 16,
-                right: 16,
+            Text(
+              title,
+              style: AppTextStyles.title2.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+                letterSpacing: -0.26,
               ),
-              child: Text(
-                title,
-                style: AppTextStyles.title2.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: -0.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              textAlign: TextAlign.left,
             ),
+            const SizedBox(height: 16),
             
             // 訊息區域
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 2,
-                left: 16,
-                right: 16,
-                bottom: 19,
+            Text(
+              message,
+              style: AppTextStyles.body.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+                letterSpacing: -0.43,
               ),
-              child: Text(
-                message,
-                style: AppTextStyles.body.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.6),
-                  letterSpacing: -0.08,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              textAlign: TextAlign.left,
             ),
+            const SizedBox(height: 40),
             
-            // 分隔線
-            Container(
-              height: 0.5,
-              color: Colors.white.withOpacity(0.2),
-            ),
-            
-            // 按鈕
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onPressed ?? () => Navigator.of(context).pop(),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(14),
-                  bottomRight: Radius.circular(14),
+            // 按鈕（次要按鈕樣式：白色背景 + 紅色邊框）
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton(
+                onPressed: onPressed ?? () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  side: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
-                child: Container(
-                  width: double.infinity,
-                  height: 44,
-                  alignment: Alignment.center,
-                  child: Text(
-                    buttonText ?? '確定',
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                      letterSpacing: -0.4,
-                    ),
+                child: Text(
+                  buttonText ?? '確定',
+                  style: AppTextStyles.bodyEmphasis.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                    letterSpacing: -0.43,
                   ),
                 ),
               ),

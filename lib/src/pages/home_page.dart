@@ -123,9 +123,11 @@ class _HomePageState extends ConsumerState<HomePage> {
       // 播放全螢幕廣告
       await _showAd();
       
-      setState(() {
-        _isAnalyzing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+      }
     } catch (e) {
       debugPrint('分析錯誤: $e');
       if (mounted) {
@@ -156,12 +158,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       return;
     }
 
+    bool adInterrupted = false;
+
     // 顯示全螢幕獎勵廣告
     await adService.showRewardedAd(
       onUserEarnedReward: () {
         // 用戶看完廣告，跳轉到 ResultPage
         debugPrint('廣告播放完成，跳轉到結果頁面');
-        if (mounted) {
+        if (mounted && !adInterrupted) {
           context.push(
             '${ResultPage.route}?imageBase64=${Uri.encodeComponent(_preparedBase64String!)}',
           );
@@ -178,6 +182,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             title: AppLocalizations.of(context)!.errorTitle,
           );
         }
+      },
+      onAdInterrupted: () {
+        // 廣告被中斷（因為錯誤）
+        debugPrint('廣告被中斷');
+        adInterrupted = true;
+        // 不需要做任何事，因為錯誤已經在 errorProvider 中顯示
       },
     );
   }
@@ -212,11 +222,20 @@ class _HomePageState extends ConsumerState<HomePage> {
     // 監聽分析錯誤（必須在 build 方法中）
     ref.listen<AnalysisState>(analysisProvider, (previous, next) {
       if (next.hasError && mounted && !errorState.hasError) {
-        // 只在還沒有錯誤時才顯示新錯誤
+        debugPrint('HomePage: 偵測到分析錯誤，中斷廣告播放');
+        
+        // 中斷廣告播放
+        final adService = AdService();
+        if (adService.isAdShowing) {
+          adService.interruptAd();
+        }
+        
+        // 顯示錯誤
         ref.read(errorProvider.notifier).showError(
           next.errorMessage ?? AppLocalizations.of(context)!.errorAnalysisFailed,
           title: AppLocalizations.of(context)!.errorTitle,
         );
+        
         setState(() {
           _isAnalyzing = false;
         });
