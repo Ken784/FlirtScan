@@ -218,6 +218,12 @@ export const analyzeConversation = functions.https.onCall(
           hasTotalScore: typeof analysisResult.totalScore !== "undefined",
           sentencesCount: analysisResult.sentences?.length || 0,
         });
+
+        // 記錄完整的 OpenAI 分析結果原始資料
+        functions.logger.info("完整分析結果（OpenAI 原始回應）", {
+          fullAnalysisResult: analysisResult,
+          rawResponseLength: responseContent.length,
+        });
       } catch (parseError) {
         functions.logger.error("JSON 解析錯誤", {
           error: parseError,

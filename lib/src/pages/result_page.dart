@@ -16,7 +16,6 @@ import '../core/models/analysis_result.dart';
 import '../features/analysis/analysis_repository.dart';
 import '../services/analysis_service.dart';
 import 'result_sentence_page.dart';
-import 'analysis_page.dart';
 
 class ResultPage extends StatefulWidget {
   const ResultPage({
@@ -37,8 +36,6 @@ class _ResultPageState extends State<ResultPage>
   AnalysisResult? _analysisResult;
   bool _isAnalyzing = false;
   String? _errorMessage;
-  String? _selectedDimensionDescription;
-  int? _selectedDimensionIndex;
   late AnimationController _scanAnimationController;
   late Animation<double> _scanAnimation;
   final ValueNotifier<bool> _isMovingRightNotifier = ValueNotifier<bool>(true);
@@ -144,11 +141,6 @@ class _ResultPageState extends State<ResultPage>
         description = _analysisResult!.balance.description;
         break;
     }
-
-    setState(() {
-      _selectedDimensionDescription = description;
-      _selectedDimensionIndex = index;
-    });
 
     // 顯示對話框
     showDialog(
@@ -259,7 +251,7 @@ class _ResultPageState extends State<ResultPage>
 
   Widget _buildErrorView() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
         PageHeader(
           title: '分析結果',
@@ -302,7 +294,7 @@ class _ResultPageState extends State<ResultPage>
 
   Widget _buildEmptyView() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
         PageHeader(
           title: '分析結果',
@@ -327,7 +319,8 @@ class _ResultPageState extends State<ResultPage>
   Widget _buildResultView() {
     final result = _analysisResult!;
     
-    // 準備雷達圖數據（將 0-10 分轉換為 0-1 的值）
+    // 準備雷達圖數據（保持 0-1 的值，讓 fl_chart 內部轉換為 0-10）
+    // fl_chart 會將 value * 10 來顯示在圖表上
     final radarDataPoints = [
       RadarDataPoint(
         label: '情緒投入度',
@@ -404,7 +397,7 @@ class _ResultPageState extends State<ResultPage>
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
         PageHeader(
           title: '分析結果',
