@@ -19,6 +19,7 @@ import '../widgets/error_dialog.dart';
 import '../services/image_service.dart';
 import '../services/ad_service.dart';
 import 'result_page.dart';
+import 'history_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -274,7 +275,15 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           bottomNavigationBar: BottomNav(
             currentIndex: _navIndex,
-            onTap: (i) => setState(() => _navIndex = i),
+            onTap: (i) {
+              if (i == _navIndex) return;
+              setState(() => _navIndex = i);
+              if (i == 0) {
+                context.go(HomePage.route);
+              } else {
+                context.go(HistoryPage.route);
+              }
+            },
           ),
         ),
         

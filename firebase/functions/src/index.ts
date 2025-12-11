@@ -127,7 +127,7 @@ export const analyzeConversation = functions.https.onCall(
 
       // 記錄準備呼叫 OpenAI API
       functions.logger.info("準備呼叫 OpenAI Vision API", {
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         imageBase64Length: imageBase64.length,
         language: language,
       });
@@ -138,7 +138,7 @@ export const analyzeConversation = functions.https.onCall(
       let completion;
       try {
         completion = await openai.chat.completions.create({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",

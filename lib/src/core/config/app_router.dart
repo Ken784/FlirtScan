@@ -13,7 +13,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: HomePage.route,
-        builder: (context, state) => const HomePage(),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: HomePage()),
       ),
       GoRoute(
         path: UploadedPage.route,
@@ -32,7 +33,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: HistoryPage.route,
-        builder: (context, state) => const HistoryPage(),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: HistoryPage()),
       ),
       GoRoute(
         path: ErrorDialogDemoPage.route,

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/analysis_result.dart';
 import '../../services/analysis_service.dart';
+import '../../services/storage_service.dart';
 
 /// 分析狀態
 enum AnalysisStatus {
@@ -48,6 +51,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
   AnalysisNotifier() : super(AnalysisState());
 
   final AnalysisService _analysisService = AnalysisService();
+  final StorageService _storageService = StorageService();
 
   /// 開始分析
   Future<void> analyze(String imageBase64) async {
@@ -70,6 +74,14 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
       state = state.copyWith(
         status: AnalysisStatus.completed,
         result: result,
+      );
+
+      // 分析完成後，自動儲存到本地歷史紀錄
+      unawaited(
+        _storageService.saveAnalysis(
+          result,
+          imageBase64: imageBase64,
+        ),
       );
     } on AnalysisException catch (e) {
       state = state.copyWith(
@@ -94,7 +106,28 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
     if (state.result != null) {
       final updatedResult = state.result!.copyWith(isAdvancedUnlocked: true);
       state = state.copyWith(result: updatedResult);
+
+       // 將「進階已解鎖」狀態同步回歷史紀錄
+       unawaited(
+         _storageService.saveAnalysis(
+           updatedResult,
+           imageBase64: state.imageBase64,
+         ),
+       );
     }
+  }
+
+  /// 從歷史紀錄載入結果
+  /// 用於 HistoryPage 點擊某筆紀錄後再次查看完整結果
+  void loadFromHistory(
+    AnalysisResult result, {
+    String? imageBase64,
+  }) {
+    state = AnalysisState(
+      status: AnalysisStatus.completed,
+      result: result,
+      imageBase64: imageBase64,
+    );
   }
 }
 

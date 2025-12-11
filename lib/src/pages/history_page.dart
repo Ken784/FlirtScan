@@ -1,21 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../core/models/analysis_result.dart';
+import '../core/providers/analysis_provider.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/icons/app_icon_widgets.dart';
+import '../services/storage_service.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/navigation/bottom_nav.dart';
 import '../widgets/cards/list_entry_card.dart';
+import 'home_page.dart';
+import 'result_page.dart';
 
-class HistoryPage extends StatefulWidget {
+class HistoryPage extends ConsumerStatefulWidget {
   const HistoryPage({super.key});
   static const String route = '/history';
 
   @override
-  State<HistoryPage> createState() => _HistoryPageState();
+  ConsumerState<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _HistoryPageState extends ConsumerState<HistoryPage> {
+  final StorageService _storageService = StorageService();
   int _navIndex = 1;
+  bool _isLoading = true;
+  List<AnalysisHistoryEntry> _history = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final results = await _storageService.getHistory();
+    if (!mounted) return;
+    setState(() {
+      _history = results;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _deleteAt(int index) async {
+    if (index < 0 || index >= _history.length) return;
+    final target = _history[index];
+    setState(() {
+      _history.removeAt(index);
+    });
+    await _storageService.deleteAnalysis(target.result.id);
+  }
+
+  void _onItemTap(AnalysisHistoryEntry entry) {
+    // 將歷史結果寫入 analysisProvider，讓 ResultPage / ResultSentencePage 可共用
+    ref.read(analysisProvider.notifier).loadFromHistory(
+          entry.result,
+          imageBase64: entry.imageBase64,
+        );
+    context.push(ResultPage.route);
+  }
+
+  String _displayName(AnalysisResult result) {
+    final name = result.partnerName.trim();
+    if (name.isEmpty || name == '對方') {
+      return '未知對象';
+    }
+    return name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,28 +81,101 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ),
         child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
-            children: [
-              PageHeader(title: '分析記錄', leading: AppIconWidgets.inbox()),
-              const SizedBox(height: AppSpacing.s16),
-              ListEntryCard(partnerName: 'Fiona Lee', scoreText: '9/10', summary: '這種若有似無的關心，其實就是喜歡的訊號！'),
-              SizedBox(height: AppSpacing.s12),
-              ListEntryCard(partnerName: 'Fiona Lee', scoreText: '6/10', summary: '感情漸漸加溫中！'),
-            ],
-          ),
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
+              : _history.isEmpty
+                  ? ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      children: [
+                        PageHeader(
+                          title: '分析記錄',
+                          leading: AppIconWidgets.inbox(),
+                        ),
+                        const SizedBox(height: AppSpacing.s32),
+                        const Center(
+                          child: Text(
+                            '目前還沒有分析紀錄',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      itemCount: _history.length + 2,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.s16),
+                            child: PageHeader(
+                              title: '分析記錄',
+                              leading: AppIconWidgets.inbox(),
+                            ),
+                          );
+                        }
+
+                        if (index == _history.length + 1) {
+                          return const SizedBox(height: AppSpacing.s16);
+                        }
+
+                        final itemIndex = index - 1;
+                        final entry = _history[itemIndex];
+                        final result = entry.result;
+
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: itemIndex == _history.length - 1
+                                ? 0
+                                : AppSpacing.s12,
+                          ),
+                          child: Dismissible(
+                            key: ValueKey(result.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.s20),
+                              color: Colors.redAccent,
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onDismissed: (_) {
+                              _deleteAt(itemIndex);
+                            },
+                            child: ListEntryCard(
+                              partnerName: _displayName(result),
+                              scoreText:
+                                  '${result.totalScore.round()}/10',
+                              summary: result.toneInsight,
+                              imageBase64: entry.imageBase64,
+                              onTap: () => _onItemTap(entry),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
         ),
       ),
       bottomNavigationBar: BottomNav(
         currentIndex: _navIndex,
-        onTap: (i) => setState(() => _navIndex = i),
+        onTap: (i) {
+          if (i == _navIndex) return;
+          setState(() => _navIndex = i);
+          if (i == 0) {
+            context.go(HomePage.route);
+          } else {
+            context.go(HistoryPage.route);
+          }
+        },
       ),
     );
   }
 }
-
-
-
-
-
 
