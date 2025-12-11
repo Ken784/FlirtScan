@@ -60,7 +60,7 @@ export const analyzeConversation = functions.https.onCall(
 - 如果無法明確區分，標記為 unknown
 
 ## 任務 2 (Radar Analysis)
-針對 5 個維度進行評分（每個維度 0-10 分），並提供具體評語：
+針對 5 個維度進行評分（每個維度 0-10 分），並提供具體理由：
 
 1. **情緒投入度 (emotional)**: 評估是否願意展示情緒（開心、生氣、擔心、心疼、撒嬌）
 2. **語氣親密度 (intimacy)**: 評估語氣是否輕、軟、甜、像講悄悄話
@@ -72,20 +72,21 @@ export const analyzeConversation = functions.https.onCall(
 
 ## 任務 3 (Key Insight)
 
-1. **relationshipStatus**: 用 4-6 個字定義這段關係的狀態（例如：「準告白狀態」、「友達以上」、「冷戰邊緣」、「純屬路人」）
-2. **summary**: 提供條列式的總結分析（Main Summary），使用 bullet points 格式
+1. **relationshipStatus**: 用 4-6 個字定義這段關係的狀態，如果沒有太多線索，保守一點沒關係（例如：「準告白狀態」、「友達以上」、「冷戰邊緣」、「純屬路人」）
+2. **summary**: 提供總結分析（Main Summary），大約50-200字左右
 3. **toneInsight**: 分析語氣特徵，描述對話的整體語調和氛圍
+4. **totalScore**: 總分，0-10分，總分是所有維度分數的加總後除以 5 的平均值，小數點以下取整數。
 
 ## 任務 4 (Sentence Analysis & Wrap-up)
 
 1. 選出 3-5 句關鍵對話，每句提供：
-   - \`originalText\`: 原始對話內容
+   - \`originalText\`: 原始對話內容。如果是連續的對話，情境相關可以合併成一句話。
    - \`speaker\`: 發話者（"me" 或 "partner" 或 "unknown"）
    - \`hiddenMeaning\`: 背後含意（潛台詞）
    - \`flirtScore\`: 1-10 星評分
    - \`scoreReason\`: 分數說明
 
-2. **advancedSummary**: 針對這幾句對話的互動細節，給出一段溫暖或犀利的總結（約 50-80 字），用來放在進階分析頁面的底部
+2. **advancedSummary**: 針對這幾句對話的互動細節，給出一段溫暖或犀利的總結（約 50-200 字），用來放在進階分析頁面的底部
 
 ## 輸出格式要求
 
@@ -99,21 +100,21 @@ export const analyzeConversation = functions.https.onCall(
   "playfulness": {"score": 0-10, "description": "評語"},
   "responsive": {"score": 0-10, "description": "評語"},
   "balance": {"score": 0-10, "description": "評語"},
-  "totalScore": 0-10,
+  "totalScore": 0-10,// 五個向度分數的平均值，小數點以下取整數。
   "relationshipStatus": "4-6字狀態短語",
-  "summary": "條列式總結（可包含換行和 bullet points）",
+  "summary": "50-200字左右的總結分析",
   "toneInsight": "語氣洞察",
   "wittyConclusion": "金句（可選）",
   "sentences": [
     {
-      "originalText": "原始對話",
+      "originalText": "原始對話內容。如果是連續的對話，情境相關可以合併成一句話",
       "speaker": "me|partner|unknown",
       "hiddenMeaning": "背後含意",
       "flirtScore": 1-10,
       "scoreReason": "分數說明"
     }
   ],
-  "advancedSummary": "進階頁面底部的總結（50-80字）"
+  "advancedSummary": "進階頁面底部的總結（50-200字）"
 }
 \`\`\`
 
@@ -126,7 +127,7 @@ export const analyzeConversation = functions.https.onCall(
 
       // 記錄準備呼叫 OpenAI API
       functions.logger.info("準備呼叫 OpenAI Vision API", {
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         imageBase64Length: imageBase64.length,
         language: language,
       });
@@ -137,7 +138,7 @@ export const analyzeConversation = functions.https.onCall(
       let completion;
       try {
         completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
