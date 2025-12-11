@@ -1,20 +1,23 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../core/icons/app_icon_widgets.dart';
+import '../core/models/analysis_result.dart';
+import '../core/providers/analysis_provider.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
-import '../core/icons/app_icon_widgets.dart';
-import '../core/providers/analysis_provider.dart';
-import '../widgets/navigation/page_header.dart';
-import '../widgets/cards/score_summary_card.dart';
-import '../widgets/cards/insight_card.dart';
-import '../widgets/cards/summary_card.dart';
-import '../widgets/charts/fl_radar_chart.dart';
-import '../widgets/charts/radar_chart.dart';
-import '../widgets/buttons/app_button.dart';
-import '../core/models/analysis_result.dart';
 import '../services/ad_service.dart';
+import '../widgets/buttons/app_button.dart';
+import '../widgets/cards/insight_card.dart';
+import '../widgets/cards/score_summary_card.dart';
+import '../widgets/cards/summary_card.dart';
+import '../widgets/charts/radar_chart.dart';
+import '../widgets/navigation/page_header.dart';
 import 'result_sentence_page.dart';
 
 class ResultPage extends ConsumerStatefulWidget {
@@ -204,6 +207,53 @@ class _ResultPageState extends ConsumerState<ResultPage>
     context.push(ResultSentencePage.route);
   }
 
+  /// 顯示對話截圖（Base64 圖片）
+  void _showConversationImage(String imageBase64) {
+    try {
+      final Uint8List bytes = base64Decode(imageBase64);
+
+      showDialog<void>(
+        context: context,
+        barrierColor: AppColors.overlay,
+        builder: (context) {
+          return GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: SafeArea(
+                child: Stack(
+                  children: [
+                    Center(
+                      child: InteractiveViewer(
+                        child: Image.memory(
+                          bytes,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('截圖載入失敗，請稍後再試')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // 監聽分析狀態
@@ -230,11 +280,14 @@ class _ResultPageState extends ConsumerState<ResultPage>
         child: SafeArea(
           child: analysisState.isAnalyzing
               ? _buildAnalyzingView()
-              : analysisState.hasError
-                  ? _buildErrorView(analysisState.errorMessage)
-                  : analysisState.result != null
-                      ? _buildResultView(analysisState.result!)
-                      : _buildEmptyView(),
+                  : analysisState.hasError
+                      ? _buildErrorView(analysisState.errorMessage)
+                      : analysisState.result != null
+                          ? _buildResultView(
+                              analysisState.result!,
+                              analysisState.imageBase64 ?? widget.imageBase64,
+                            )
+                          : _buildEmptyView(),
         ),
       ),
     );
@@ -374,7 +427,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
     );
   }
 
-  Widget _buildResultView(AnalysisResult result) {
+  Widget _buildResultView(AnalysisResult result, String? imageBase64) {
     
     // 準備雷達圖數據（保持 0-1 的值，讓 fl_chart 內部轉換為 0-10）
     // fl_chart 會將 value * 10 來顯示在圖表上
@@ -469,7 +522,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
           scoreMinor: 10,
         ),
         const SizedBox(height: AppSpacing.s24),
-        // 雷達圖分析卡片
+        // 評分分析卡片（查看對話截圖 + 五個維度說明）
         Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -484,34 +537,71 @@ class _ResultPageState extends ConsumerState<ResultPage>
           ),
           padding: const EdgeInsets.all(AppSpacing.s24),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 雷達圖
-              Center(
-                child: FlRadarChart(
-                  dataPoints: radarDataPoints,
-                  size: 230,
-                  onPointTapped: (index, point) => _onRadarPointTapped(index, point, result),
+              // 查看對話截圖
+              if (imageBase64 != null)
+                GestureDetector(
+                  onTap: () => _showConversationImage(imageBase64),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '查看對話截圖',
+                        style: AppTextStyles.bodyEmphasis.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.s4),
+                      AppIconWidgets.camera(
+                        size: 24,
+                        color: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '沒有對話截圖',
+                      style: AppTextStyles.subheadline.copyWith(
+                        color: AppColors.textBlack80,
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: AppSpacing.s16),
+              // 分隔線
+              Container(
+                height: 1,
+                width: double.infinity,
+                color: AppColors.secondaryBlue,
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              // 五個維度詳細分析
+              ...dimensionAnalyses.map(
+                (analysis) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.s16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
+                        style: AppTextStyles.bodyEmphasis,
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      Text(
+                        analysis.description,
+                        style: AppTextStyles.subheadline,
+                        textAlign: TextAlign.left,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.s32),
-              // 詳細分析
-              ...dimensionAnalyses.map((analysis) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
-                          style: AppTextStyles.bodyEmphasis,
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          analysis.description,
-                          style: AppTextStyles.subheadline,
-                        ),
-                      ],
-                    ),
-                  )),
             ],
           ),
         ),
@@ -538,9 +628,9 @@ class _ResultPageState extends ConsumerState<ResultPage>
           label: '截圖',
           variant: AppButtonVariant.primary,
           leading: AppIconWidgets.camera(size: 24, color: Colors.white),
-          onPressed: () {
-            // TODO: 實作截圖功能
-          },
+          onPressed: imageBase64 == null
+              ? null
+              : () => _showConversationImage(imageBase64),
         ),
       ],
     );
