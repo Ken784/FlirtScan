@@ -43,14 +43,30 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     });
   }
 
-  Future<void> _deleteAt(int index) async {
-    if (index < 0 || index >= _history.length) return;
-    final target = _history[index];
-    setState(() {
-      _history.removeAt(index);
-    });
-    await _storageService.deleteAnalysis(target.result.id);
+  /// 根據 ID 刪除記錄（更可靠，不依賴索引）
+  Future<void> _deleteById(String id) async {
+    // 先從 UI 中移除（樂觀更新），提供即時反饋
+    // 這樣即使儲存操作有延遲，用戶也能立即看到反饋
+    bool wasInList = false;
+    if (mounted) {
+      setState(() {
+        wasInList = _history.any((entry) => entry.result.id == id);
+        _history.removeWhere((entry) => entry.result.id == id);
+      });
+    }
+    
+    // 然後從儲存中刪除，確保資料已從持久化儲存中移除
+    // 這樣即使頁面重新構建，資料也不會再出現
+    try {
+      await _storageService.deleteAnalysis(id);
+    } catch (e) {
+      // 如果刪除失敗且記錄原本在列表中，重新載入以確保一致性
+      if (mounted && wasInList) {
+        _loadHistory();
+      }
+    }
   }
+
 
   void _onItemTap(AnalysisHistoryEntry entry) {
     // 將歷史結果寫入 analysisProvider，讓 ResultPage / ResultSentencePage 可共用
@@ -147,7 +163,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                               ),
                             ),
                             onDismissed: (_) {
-                              _deleteAt(itemIndex);
+                              _deleteById(result.id);
                             },
                             child: ListEntryCard(
                               partnerName: _displayName(result),

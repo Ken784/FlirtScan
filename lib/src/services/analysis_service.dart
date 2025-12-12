@@ -43,10 +43,16 @@ class AnalysisService {
         // 同樣需要安全轉換嵌套的 Map
         final analysisData = Map<String, dynamic>.from(responseData['data'] as Map);
         
+        // 確保有 ID：如果 Firebase 沒有返回 ID，生成一個
+        if (analysisData['id'] == null) {
+          analysisData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
+        }
+        
         // 轉換為 AnalysisResult
         final analysisResult = AnalysisResult.fromJson(analysisData);
         
         debugPrint('AnalysisService: 分析完成');
+        debugPrint('AnalysisService: 結果 ID: ${analysisResult.id}');
         debugPrint('AnalysisService: 總分 ${analysisResult.totalScore}/10');
         debugPrint('AnalysisService: 關係狀態 ${analysisResult.relationshipStatus}');
         
