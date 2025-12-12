@@ -12,12 +12,14 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../services/ad_service.dart';
+import '../services/storage_service.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/cards/insight_card.dart';
 import '../widgets/cards/score_summary_card.dart';
 import '../widgets/cards/summary_card.dart';
 import '../widgets/charts/radar_chart.dart';
 import '../widgets/navigation/page_header.dart';
+import '../widgets/confirm_delete_dialog.dart';
 import 'result_sentence_page.dart';
 
 class ResultPage extends ConsumerStatefulWidget {
@@ -40,6 +42,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
   final ValueNotifier<bool> _isMovingRightNotifier = ValueNotifier<bool>(true);
   double _previousAnimationValue = 0.0;
   final AdService _adService = AdService();
+  final StorageService _storageService = StorageService();
   bool _isLoadingAd = false;
 
   @override
@@ -207,6 +210,41 @@ class _ResultPageState extends ConsumerState<ResultPage>
     context.push(ResultSentencePage.route);
   }
 
+  /// 處理刪除按鈕點擊
+  Future<void> _handleDelete() async {
+    final analysisState = ref.read(analysisProvider);
+    final result = analysisState.result;
+    
+    if (result == null) {
+      return;
+    }
+
+    // 顯示確認對話框（使用符合 Figma 設計的對話框）
+    final confirmed = await showConfirmDeleteDialog(context);
+
+    if (confirmed == true && mounted) {
+      // 刪除分析結果
+      try {
+        await _storageService.deleteAnalysis(result.id);
+        
+        // 返回上一頁
+        if (mounted) {
+          context.pop();
+        }
+      } catch (e) {
+        // 刪除失敗時顯示錯誤訊息
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('刪除失敗：$e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   /// 顯示對話截圖（Base64 圖片）
   void _showConversationImage(String imageBase64) {
     try {
@@ -368,6 +406,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
           title: '分析結果',
           leading: AppIconWidgets.arrowBack(),
           trailing: AppIconWidgets.delete(),
+          onTrailingTap: _handleDelete,
         ),
         const SizedBox(height: AppSpacing.s24),
         Container(
@@ -411,6 +450,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
           title: '分析結果',
           leading: AppIconWidgets.arrowBack(),
           trailing: AppIconWidgets.delete(),
+          onTrailingTap: _handleDelete,
         ),
         const SizedBox(height: AppSpacing.s24),
         Container(
@@ -513,6 +553,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
           title: '分析結果',
           leading: AppIconWidgets.arrowBack(),
           trailing: AppIconWidgets.delete(),
+          onTrailingTap: _handleDelete,
         ),
         const SizedBox(height: AppSpacing.s16),
         ScoreSummaryCard(

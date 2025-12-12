@@ -8,11 +8,13 @@ class PageHeader extends StatelessWidget {
     required this.title,
     this.leading,
     this.trailing,
+    this.onTrailingTap,
   });
 
   final String title;
   final Widget? leading;
   final Widget? trailing;
+  final VoidCallback? onTrailingTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,13 @@ class PageHeader extends StatelessWidget {
             const SizedBox(width: AppSpacing.s16),
           ],
           Expanded(child: Text(title, style: AppTextStyles.title1)),
-          if (trailing != null) trailing!,
+          if (trailing != null)
+            onTrailingTap != null
+                ? GestureDetector(
+                    onTap: onTrailingTap,
+                    child: trailing!,
+                  )
+                : trailing!,
         ],
       ),
     );
