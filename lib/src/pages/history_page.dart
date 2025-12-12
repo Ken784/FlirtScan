@@ -27,6 +27,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   int _navIndex = 1;
   bool _isLoading = true;
   List<AnalysisHistoryEntry> _history = [];
+  bool _shouldReloadOnNextBuild = false;
 
   @override
   void initState() {
@@ -74,7 +75,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           entry.result,
           imageBase64: entry.imageBase64,
         );
-    context.push(ResultPage.route);
+    // 當從 ResultPage 返回時，重新載入數據以反映可能的刪除操作
+    context.push(ResultPage.route).then((_) {
+      // 從 ResultPage 返回，設置標記以在下次 build 時重新載入
+      if (mounted) {
+        setState(() {
+          _shouldReloadOnNextBuild = true;
+        });
+      }
+    });
   }
 
   String _displayName(AnalysisResult result) {
@@ -87,6 +96,17 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 檢查是否需要重新載入數據（從 ResultPage 返回時）
+    if (_shouldReloadOnNextBuild) {
+      _shouldReloadOnNextBuild = false;
+      // 在下一幀重新載入，避免在 build 期間修改狀態
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _loadHistory();
+        }
+      });
+    }
+    
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
