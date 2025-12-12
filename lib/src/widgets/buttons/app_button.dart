@@ -47,25 +47,28 @@ class AppButton extends StatelessWidget {
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: AppSpacing.s52),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: bg,
-          foregroundColor: fg,
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.pill, side: border ?? BorderSide.none),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20, vertical: AppSpacing.s12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: AppSpacing.s12),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            backgroundColor: bg,
+            foregroundColor: fg,
+            shape: RoundedRectangleBorder(borderRadius: AppRadii.pill, side: border ?? BorderSide.none),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20, vertical: AppSpacing.s12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (leading != null) ...[
+                leading!,
+                const SizedBox(width: AppSpacing.s12),
+              ],
+              Text(label, style: AppTextStyles.bodyEmphasis.copyWith(color: fg)),
             ],
-            Text(label, style: AppTextStyles.bodyEmphasis.copyWith(color: fg)),
-          ],
+          ),
         ),
       ),
     );

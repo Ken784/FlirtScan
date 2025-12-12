@@ -27,6 +27,9 @@ dependencies:
   # Image Compression
   flutter_image_compress: ^2.1.0
   
+  # Image Processing (for PNG to JPG conversion)
+  image: ^4.3.0
+  
   # Path Provider (for temporary file storage)
   path_provider: ^2.1.1
   
@@ -42,6 +45,9 @@ dependencies:
 
   # Local Storage
   shared_preferences: ^2.2.2
+  
+  # Share
+  share_plus: ^10.1.2
 
 dev_dependencies:
   flutter_test:

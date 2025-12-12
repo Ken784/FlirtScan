@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,7 @@ import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../services/ad_service.dart';
 import '../services/storage_service.dart';
+import '../services/screenshot_service.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/cards/insight_card.dart';
 import '../widgets/cards/score_summary_card.dart';
@@ -43,6 +45,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
   double _previousAnimationValue = 0.0;
   final AdService _adService = AdService();
   final StorageService _storageService = StorageService();
+  final ScreenshotService _screenshotService = ScreenshotService();
+  final GlobalKey _repaintBoundaryKey = GlobalKey();
   bool _isLoadingAd = false;
 
   @override
@@ -546,10 +550,24 @@ class _ResultPageState extends ConsumerState<ResultPage>
       }
     }
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
-      children: [
-        PageHeader(
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.bgGradientTop, AppColors.bgGradientBottom],
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: RepaintBoundary(
+          key: _repaintBoundaryKey,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
+            child: Column(
+              children: [
+          PageHeader(
           title: '分析結果',
           leading: AppIconWidgets.arrowBack(),
           trailing: AppIconWidgets.delete(),
@@ -669,12 +687,64 @@ class _ResultPageState extends ConsumerState<ResultPage>
           label: '截圖',
           variant: AppButtonVariant.primary,
           leading: AppIconWidgets.camera(size: 24, color: Colors.white),
-          onPressed: imageBase64 == null
-              ? null
-              : () => _showConversationImage(imageBase64),
+          onPressed: () => _handleScreenshot(),
         ),
-      ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  /// 處理截圖分享
+  Future<void> _handleScreenshot() async {
+    try {
+      // 顯示載入提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('正在生成截圖...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // 滾動到頂部，確保所有內容都已渲染
+      final ScrollController? scrollController = _repaintBoundaryKey.currentContext
+          ?.findAncestorWidgetOfExactType<SingleChildScrollView>()
+          ?.controller;
+      
+      if (scrollController != null && scrollController.hasClients) {
+        await scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.linear,
+        );
+      }
+
+      // 等待多幀，確保 RepaintBoundary 已完全渲染所有內容
+      // 使用 SchedulerBinding 確保在下一幀後執行
+      await Future.delayed(const Duration(milliseconds: 500));
+      await SchedulerBinding.instance.endOfFrame;
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // 生成截圖並分享
+      await _screenshotService.captureAndShare(
+        repaintBoundaryKey: _repaintBoundaryKey,
+        pixelRatio: 3.0, // 高解析度
+        context: context, // 傳遞 context 用於 iOS sharePositionOrigin
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('截圖失敗：$e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
