@@ -52,7 +52,7 @@ class _ScoreSummaryCardState extends State<ScoreSummaryCard>
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFD9E7),
+        color: const Color(0xFF350354),
         borderRadius: AppRadii.card,
         boxShadow: AppShadow.card,
       ),
@@ -64,9 +64,26 @@ class _ScoreSummaryCardState extends State<ScoreSummaryCard>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.title, style: AppTextStyles.footnote),
-              const SizedBox(height: AppSpacing.s4),
-              Text(widget.stateText, style: AppTextStyles.title2),
+              Text(
+                widget.title,
+                style: AppTextStyles.captionRegular.copyWith(
+                  letterSpacing: 0,
+                  height: 16 / 12,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: AppSpacing.s8),
+              Text(
+                widget.stateText,
+                style: AppTextStyles.body1Semi.copyWith(
+                  fontSize: 20,
+                  height: 25 / 20,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.45,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
           AnimatedBuilder(
@@ -80,19 +97,23 @@ class _ScoreSummaryCardState extends State<ScoreSummaryCard>
                   children: [
                     TextSpan(
                       text: '$animatedScore',
-                      style: const TextStyle(
-                        fontSize: 80,
-                        height: 0.75, // 調整行高使數字更緊湊，垂直置中
+                      style: TextStyle(
+                        fontSize: 72,
+                        height: 72 / 72,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFF02D2D), // 使用明確的顏色值
-                        fontFamily: 'SF Pro',
+                        color: const Color(0xFFFF509C),
+                        fontFamily: AppTextStyles.primaryFontFamily,
+                        letterSpacing: 0.38,
                       ),
                     ),
                     TextSpan(
                       text: '/${widget.scoreMinor}',
-                      style: AppTextStyles.title3.copyWith(
-                        color: AppColors.textBlack80,
-                        height: 0.75, // 同樣調整小字的行高
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 16 / 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                        fontFamily: AppTextStyles.primaryFontFamily,
                       ),
                     ),
                   ],

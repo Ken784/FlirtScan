@@ -72,7 +72,7 @@ class RadarChartWithLabels extends StatelessWidget {
                 width: 60,
                 child: Text(
                   label,
-                  style: AppTextStyles.captionEmphasis,
+                  style: AppTextStyles.captionBold,
                   textAlign: textAlign,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

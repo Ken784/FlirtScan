@@ -34,14 +34,14 @@ class AdvancedSummaryCard extends StatelessWidget {
         children: [
           Text(
             '✨ 總結',
-            style: AppTextStyles.bodyEmphasis.copyWith(
+            style: AppTextStyles.body2Semi.copyWith(
               color: Colors.white,
             ),
           ),
           const SizedBox(height: AppSpacing.s8),
           Text(
             summary,
-            style: AppTextStyles.subheadline.copyWith(
+            style: AppTextStyles.body3Regular.copyWith(
               color: Colors.white,
             ),
           ),

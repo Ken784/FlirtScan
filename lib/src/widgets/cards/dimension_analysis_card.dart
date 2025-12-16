@@ -34,12 +34,12 @@ class DimensionAnalysisCard extends StatelessWidget {
         children: [
           Text(
             '$title ($score/$maxScore)：',
-            style: AppTextStyles.bodyEmphasis,
+            style: AppTextStyles.body2Bold,
           ),
           const SizedBox(height: AppSpacing.s4),
           Text(
             description,
-            style: AppTextStyles.subheadline,
+            style: AppTextStyles.body3Regular,
           ),
         ],
       ),

@@ -27,9 +27,9 @@ class InsightCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.bodyEmphasis),
+          Text(title, style: AppTextStyles.body2Bold),
           const SizedBox(height: AppSpacing.s8),
-          Text(body, style: AppTextStyles.subheadline),
+          Text(body, style: AppTextStyles.body3Regular),
         ],
       ),
     );

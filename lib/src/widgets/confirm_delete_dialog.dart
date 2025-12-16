@@ -66,11 +66,9 @@ class ConfirmDeleteDialog extends StatelessWidget {
             // 標題
             Text(
               title ?? '確認刪除？',
-              style: AppTextStyles.title2.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+              style: AppTextStyles.body1Semi.copyWith(
+                fontSize: 18,
                 color: AppColors.textBlack,
-                letterSpacing: -0.26,
               ),
             ),
             const SizedBox(height: AppSpacing.s16),
@@ -78,12 +76,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
             // 訊息內容
             Text(
               message ?? '確定要刪除這筆分析結果嗎？此操作無法復原。',
-              style: AppTextStyles.body.copyWith(
-                fontSize: 17,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textBlack,
-                letterSpacing: -0.43,
-              ),
+              style: AppTextStyles.body3Regular,
             ),
             const SizedBox(height: AppSpacing.s24),
             
@@ -107,11 +100,8 @@ class ConfirmDeleteDialog extends StatelessWidget {
                 ),
                 child: Text(
                   confirmText ?? '確定',
-                  style: AppTextStyles.bodyEmphasis.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.body2Semi.copyWith(
                     color: Colors.white,
-                    letterSpacing: -0.43,
                   ),
                 ),
               ),
@@ -140,11 +130,8 @@ class ConfirmDeleteDialog extends StatelessWidget {
                 ),
                 child: Text(
                   cancelText ?? '取消',
-                  style: AppTextStyles.bodyEmphasis.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.body2Semi.copyWith(
                     color: AppColors.primary,
-                    letterSpacing: -0.43,
                   ),
                 ),
               ),
@@ -155,6 +142,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
     );
   }
 }
+
 
 
 

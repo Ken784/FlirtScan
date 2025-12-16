@@ -256,7 +256,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
             child: SafeArea(
-              child: Column(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
                 children: [
                   // 標題欄
                   PageHeader(
@@ -264,11 +265,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     leading: AppIconWidgets.heartOutline(size: 24),
                   ),
                   // 主要內容區域
-                  Expanded(
-                    child: _selectedImage == null
-                        ? _buildInitialState()
-                        : _buildImagePreviewState(),
-                  ),
+                  if (_selectedImage == null) ..._buildInitialStateContent() else ..._buildImagePreviewStateContent(),
                 ],
               ),
             ),
@@ -312,162 +309,147 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildInitialState() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-      children: [
-        const SizedBox(height: AppSpacing.s16),
-        // 上傳卡片（按鈕在卡片內）
-        UploadCard(
-          onUploadPressed: _pickImage,
-        ),
-        const SizedBox(height: AppSpacing.s24),
-        // 說明區域
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _SectionTitle(text: '如何更精準的分析你們的曖昧程度？'),
-              SizedBox(height: AppSpacing.s16),
-              _CheckItem(text: '確保截圖包含完整的上下文'),
-              SizedBox(height: AppSpacing.s8),
-              _CheckItem(text: '只能分析雙人對話'),
-              SizedBox(height: AppSpacing.s8),
-              _CheckItem(text: '建議包含5句以上的對話'),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.s24),
-      ],
-    );
-  }
-
-  Widget _buildImagePreviewState() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-      children: [
-        const SizedBox(height: AppSpacing.s24),
-        // 圖片預覽卡片（可點擊預覽）
-        Stack(
-          children: [
-            GestureDetector(
-              onTap: _showImagePreview,
-              child: Container(
-                height: 416,
-                decoration: BoxDecoration(
-                  color: Colors.white, // 白色背景
-                  borderRadius: AppRadii.image,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 8,
-                  ),
-                  boxShadow: AppShadow.card,
-                ),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: AppRadii.image,
-                      child: Image.file(
-                        _selectedImage!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    ),
-                    // 處理中遮罩
-                    if (_isProcessing)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.3),
-                          borderRadius: AppRadii.image,
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            // 右上角刪除按鈕
-            Positioned(
-              top: AppSpacing.s16,
-              right: AppSpacing.s16,
-              child: GestureDetector(
-                onTap: _removeImage,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+  List<Widget> _buildInitialStateContent() {
+    return [
+      const SizedBox(height: AppSpacing.s16),
+      // 上傳卡片（按鈕在卡片內）
+      UploadCard(
+        onUploadPressed: _pickImage,
+      ),
+      const SizedBox(height: AppSpacing.s24),
+      // 說明區域
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            _SectionTitle(text: '如何更精準的分析你們的曖昧程度？'),
+            SizedBox(height: AppSpacing.s16),
+            _CheckItem(text: '確保截圖包含完整的上下文'),
+            SizedBox(height: AppSpacing.s8),
+            _CheckItem(text: '只能分析雙人對話'),
+            SizedBox(height: AppSpacing.s8),
+            _CheckItem(text: '建議包含5句以上的對話'),
           ],
         ),
-        const SizedBox(height: AppSpacing.s24),
-        // 處理狀態提示
-        if (_isProcessing)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-            child: Text(
-              '正在處理圖片...',
-              style: AppTextStyles.callout.copyWith(color: AppColors.textBlack80),
-              textAlign: TextAlign.center,
-            ),
-          )
-        else if (_isAnalyzing)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-            child: Text(
-              '正在分析對話...',
-              style: AppTextStyles.callout.copyWith(color: AppColors.textBlack80),
-              textAlign: TextAlign.center,
-            ),
-          )
-        else if (_preparedBase64String != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-            child: Text(
-              '圖片已準備完成，可以開始分析',
-              style: AppTextStyles.callout.copyWith(color: AppColors.success),
-              textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: AppSpacing.s24),
+    ];
+  }
+
+  List<Widget> _buildImagePreviewStateContent() {
+    return [
+      const SizedBox(height: AppSpacing.s24),
+      // 圖片預覽卡片（可點擊預覽）
+      Stack(
+        children: [
+          GestureDetector(
+            onTap: _showImagePreview,
+            child: Container(
+              height: 416,
+              decoration: BoxDecoration(
+                color: Colors.white, // 白色背景
+                borderRadius: AppRadii.image,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 8,
+                ),
+                boxShadow: AppShadow.card,
+              ),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: AppRadii.image,
+                    child: Image.file(
+                      _selectedImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                  // 處理中遮罩
+                  if (_isProcessing)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: AppRadii.image,
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        const SizedBox(height: AppSpacing.s16),
-        // 開始分析按鈕
-        AppButton(
-          label: _isAnalyzing ? '分析中...' : '開始分析對話',
-          variant: AppButtonVariant.primary,
-          onPressed: _preparedBase64String != null && !_isProcessing && !_isAnalyzing
-              ? _startAnalysis
-              : null, // 未準備完成時禁用按鈕
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        // 說明文字
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20),
-          child: Text(
-            '深度解析對話中的情緒、語氣與曖昧指數，還能生成雷達圖和可分享的金句！',
-            style: AppTextStyles.subheadline,
-            textAlign: TextAlign.center,
+          // 右上角刪除按鈕
+          Positioned(
+            top: AppSpacing.s16,
+            right: AppSpacing.s16,
+            child: GestureDetector(
+              onTap: _removeImage,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
           ),
+        ],
+      ),
+      const SizedBox(height: AppSpacing.s24),
+      // 處理狀態提示
+      if (_isProcessing)
+        Text(
+          '正在處理圖片...',
+          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          textAlign: TextAlign.center,
+        )
+      else if (_isAnalyzing)
+        Text(
+          '正在分析對話...',
+          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          textAlign: TextAlign.center,
+        )
+      else if (_preparedBase64String != null)
+        Text(
+          '圖片已準備完成，可以開始分析',
+          style: AppTextStyles.body3Regular.copyWith(color: AppColors.green),
+          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.s24),
-      ],
-    );
+      const SizedBox(height: AppSpacing.s16),
+      // 開始分析按鈕
+      AppButton(
+        label: _isAnalyzing ? '分析中...' : '開始分析對話',
+        variant: AppButtonVariant.primary,
+        onPressed: _preparedBase64String != null && !_isProcessing && !_isAnalyzing
+            ? _startAnalysis
+            : null, // 未準備完成時禁用按鈕
+      ),
+      const SizedBox(height: AppSpacing.s16),
+      // 說明文字
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+        child: Text(
+          '深度解析對話中的情緒、語氣與曖昧指數，還能生成雷達圖和可分享的金句！',
+          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.s24),
+    ];
   }
 }
 
@@ -479,7 +461,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: AppTextStyles.title3,
+      style: AppTextStyles.body2Bold,
     );
   }
 }
@@ -492,12 +474,12 @@ class _CheckItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        AppIconWidgets.check(size: 24, color: AppColors.success),
-        const SizedBox(width: AppSpacing.s10),
+        AppIconWidgets.check(size: 24, color: AppColors.green),
+        const SizedBox(width: AppSpacing.s8),
         Expanded(
           child: Text(
             text,
-            style: AppTextStyles.callout,
+            style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
           ),
         ),
       ],

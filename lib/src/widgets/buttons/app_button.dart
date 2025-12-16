@@ -13,12 +13,14 @@ class AppButton extends StatelessWidget {
     this.onPressed,
     this.variant = AppButtonVariant.primary,
     this.leading,
+    this.textStyle,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
   final Widget? leading;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +68,12 @@ class AppButton extends StatelessWidget {
                 leading!,
                 const SizedBox(width: AppSpacing.s12),
               ],
-              Text(label, style: AppTextStyles.bodyEmphasis.copyWith(color: fg)),
+              Text(
+                label,
+                style: (textStyle ?? AppTextStyles.body3Bold).copyWith(
+                  color: fg,
+                ),
+              ),
             ],
           ),
         ),

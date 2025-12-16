@@ -48,28 +48,35 @@ class QuoteAnalysisCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.s16),
             child: Text(
               '"$quote"', 
-              style: AppTextStyles.callout.copyWith(color: AppColors.textBlack),
+              style: AppTextStyles.body3Semi.copyWith(color: AppColors.textBlack),
             ),
           ),
           const SizedBox(height: AppSpacing.s16),
-          Text('背後含意', style: AppTextStyles.bodyEmphasis),
+          Text('背後含意', style: AppTextStyles.body3Bold),
           const SizedBox(height: AppSpacing.s4),
-          Text(meaning, style: AppTextStyles.subheadline),
+          Text(meaning, style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80)),
           const SizedBox(height: AppSpacing.s16),
           // 曖昧指數標題
-          Text('曖昧指數', style: AppTextStyles.bodyEmphasis),
+          Text('曖昧指數', style: AppTextStyles.body3Bold),
           const SizedBox(height: AppSpacing.s4),
           // 星星和百分比在下一行
           Row(
             children: [
               _Stars(value: rating),
               const SizedBox(width: AppSpacing.s8),
-              Text('($ratingPercent%)', style: AppTextStyles.footnote),
+              Text(
+                '($ratingPercent%)',
+                style: AppTextStyles.captionRegular.copyWith(
+                  fontSize: 13,
+                  height: 18 / 13,
+                  letterSpacing: -0.08,
+                ),
+              ),
             ],
           ),
           if (reason != null && reason!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.s4),
-            Text(reason!, style: AppTextStyles.subheadline),
+            Text(reason!, style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80)),
           ],
         ],
       ),
@@ -89,8 +96,8 @@ class _Stars extends StatelessWidget {
         final filled = i < value;
         return Icon(
           filled ? Icons.star : Icons.star_border,
-          color: filled ? AppColors.primary : AppColors.primary.withOpacity(0.4),
-          size: 18,
+          color: filled ? AppColors.star : AppColors.star.withOpacity(0.4),
+          size: 15,
         );
       }),
     );

@@ -38,7 +38,7 @@ class UploadCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.s8),
               Text(
                 '上傳你們的對話',
-                style: AppTextStyles.title3,
+                style: AppTextStyles.body2Semi,
                 textAlign: TextAlign.center,
               ),
             ],

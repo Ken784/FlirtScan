@@ -6,6 +6,7 @@ class AppTextStyles {
   const AppTextStyles._();
 
   static const String primaryFontFamily = 'SF Pro';
+  static const double defaultLetterSpacing = -0.4;
 
   static TextStyle _base({
     required double size,
@@ -13,6 +14,7 @@ class AppTextStyles {
     FontWeight weight = FontWeight.w400,
     Color color = AppColors.textBlack,
     FontStyle style = FontStyle.normal,
+    double? letterSpacing,
   }) {
     return TextStyle(
       fontFamily: primaryFontFamily,
@@ -21,23 +23,88 @@ class AppTextStyles {
       fontWeight: weight,
       color: color,
       fontStyle: style,
+      letterSpacing: letterSpacing ?? defaultLetterSpacing,
     );
   }
 
-  // Titles
-  static final TextStyle title1 = _base(size: 28, height: 34, weight: FontWeight.w700);
-  static final TextStyle title2 = _base(size: 22, height: 28, weight: FontWeight.w700);
-  static final TextStyle title3 = _base(size: 20, height: 25, weight: FontWeight.w600);
+  // Header styles
+  static final TextStyle header1Bold = _base(
+    size: 18,
+    height: 24,
+    weight: FontWeight.w700,
+  );
 
-  // Body
-  static final TextStyle body = _base(size: 17, height: 22, weight: FontWeight.w400, color: AppColors.textBlack80);
-  static final TextStyle bodyEmphasis = _base(size: 17, height: 22, weight: FontWeight.w600);
+  static final TextStyle header2Semi = _base(
+    size: 18,
+    height: 24,
+    weight: FontWeight.w500,
+  );
 
-  // Callout/Subheadline/Footnote/Caption
-  static final TextStyle callout = _base(size: 16, height: 21, weight: FontWeight.w400, color: AppColors.textBlack80);
-  static final TextStyle subheadline = _base(size: 15, height: 20, weight: FontWeight.w400, color: AppColors.textBlack80);
-  static final TextStyle footnote = _base(size: 13, height: 18, weight: FontWeight.w400, color: AppColors.textBlack80);
-  static final TextStyle captionEmphasis = _base(size: 12, height: 16, weight: FontWeight.w500);
+  // Body 1 styles
+  static final TextStyle body1Bold = _base(
+    size: 18,
+    height: 24,
+    weight: FontWeight.w700,
+  );
+
+  static final TextStyle body1Semi = _base(
+    size: 18,
+    height: 24,
+    weight: FontWeight.w500,
+  );
+
+  // Body 2 styles
+  static final TextStyle body2Bold = _base(
+    size: 16,
+    height: 24,
+    weight: FontWeight.w700,
+  );
+
+  static final TextStyle body2Semi = _base(
+    size: 16,
+    height: 24,
+    weight: FontWeight.w500,
+  );
+
+  static final TextStyle body2Regular = _base(
+    size: 16,
+    height: 24,
+    weight: FontWeight.w400,
+    letterSpacing: 0,
+  );
+
+  // Body 3 styles
+  static final TextStyle body3Bold = _base(
+    size: 14,
+    height: 20,
+    weight: FontWeight.w700,
+  );
+
+  static final TextStyle body3Semi = _base(
+    size: 14,
+    height: 20,
+    weight: FontWeight.w500,
+  );
+
+  static final TextStyle body3Regular = _base(
+    size: 14,
+    height: 20,
+    weight: FontWeight.w400,
+  );
+
+  // Caption styles
+  static final TextStyle captionBold = _base(
+    size: 12,
+    height: 18,
+    weight: FontWeight.w700,
+  );
+
+  static final TextStyle captionRegular = _base(
+    size: 12,
+    height: 18,
+    weight: FontWeight.w400,
+  );
+
 }
 
 

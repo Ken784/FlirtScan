@@ -32,10 +32,10 @@ class SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.bodyEmphasis),
+          Text(title, style: AppTextStyles.body2Bold),
           const SizedBox(height: AppSpacing.s8),
           if (content.isNotEmpty) ...[
-            Text(content, style: AppTextStyles.subheadline),
+            Text(content, style: AppTextStyles.body3Regular),
             if (bulletPoints.isNotEmpty) const SizedBox(height: AppSpacing.s8),
           ],
           if (bulletPoints.isNotEmpty) ...[
@@ -61,7 +61,7 @@ class SummaryCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           point,
-                          style: AppTextStyles.subheadline,
+                          style: AppTextStyles.body3Regular,
                         ),
                       ),
                     ],
@@ -69,11 +69,11 @@ class SummaryCard extends StatelessWidget {
                 )),
             if (footer != null) ...[
               const SizedBox(height: AppSpacing.s8),
-              Text(footer!, style: AppTextStyles.subheadline),
+              Text(footer!, style: AppTextStyles.body3Regular),
             ],
           ] else if (footer != null) ...[
             const SizedBox(height: AppSpacing.s8),
-            Text(footer!, style: AppTextStyles.subheadline),
+            Text(footer!, style: AppTextStyles.body3Regular),
           ],
         ],
       ),

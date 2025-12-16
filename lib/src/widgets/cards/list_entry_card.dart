@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
@@ -14,29 +11,18 @@ class ListEntryCard extends StatelessWidget {
     required this.partnerName,
     required this.scoreText,
     required this.summary,
-    this.imageBase64,
+    required this.dateText,
     this.onTap,
   });
 
   final String partnerName;
   final String scoreText;
   final String summary;
-  final String? imageBase64;
+  final String dateText;
   final VoidCallback? onTap;
-
-  Uint8List? _decodeImage() {
-    if (imageBase64 == null || imageBase64!.isEmpty) return null;
-    try {
-      return base64Decode(imageBase64!);
-    } catch (_) {
-      return null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final bytes = _decodeImage();
-
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -45,54 +31,55 @@ class ListEntryCard extends StatelessWidget {
           borderRadius: AppRadii.card,
           boxShadow: AppShadow.card,
         ),
-        padding: const EdgeInsets.all(AppSpacing.s20),
+        padding: const EdgeInsets.all(AppSpacing.s16),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.all(AppRadii.r4),
-              child: SizedBox(
-                width: 80,
-                height: 80,
-                child: bytes != null
-                    ? Image.memory(
-                        bytes,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        color: Colors.black12,
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.image,
-                          color: Colors.white70,
-                        ),
-                      ),
+            // 左側：分數（大數字）
+            SizedBox(
+              width: 70,
+              child: Text(
+                scoreText,
+                style: AppTextStyles.body2Bold.copyWith(
+                  fontSize: 52,
+                  height: 64 / 52,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(width: AppSpacing.s12),
+            // 右側：名稱、日期、摘要
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // 名稱和日期在同一行
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           partnerName,
-                          style: AppTextStyles.bodyEmphasis,
+                          style: AppTextStyles.body3Bold,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: AppSpacing.s4),
                       Text(
-                        scoreText,
-                        style: AppTextStyles.bodyEmphasis
-                            .copyWith(color: AppColors.primary),
+                        dateText,
+                        style: AppTextStyles.captionRegular.copyWith(
+                          color: AppColors.grey40,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.s8),
+                  const SizedBox(height: AppSpacing.s4),
                   Text(
                     summary,
-                    style: AppTextStyles.subheadline,
+                    style: AppTextStyles.body3Regular,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

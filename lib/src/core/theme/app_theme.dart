@@ -17,15 +17,21 @@ class AppTheme {
 
     return base.copyWith(
       textTheme: base.textTheme.copyWith(
-        displayLarge: AppTextStyles.title1,
-        headlineLarge: AppTextStyles.title1,
-        headlineMedium: AppTextStyles.title2,
-        headlineSmall: AppTextStyles.title3,
-        bodyLarge: AppTextStyles.body,
-        bodyMedium: AppTextStyles.callout,
-        bodySmall: AppTextStyles.subheadline,
-        titleMedium: AppTextStyles.bodyEmphasis,
-        titleSmall: AppTextStyles.captionEmphasis,
+        // Header styles
+        displayLarge: AppTextStyles.header1Bold,
+        headlineLarge: AppTextStyles.header1Bold,
+        headlineMedium: AppTextStyles.header2Semi,
+        headlineSmall: AppTextStyles.header1Bold,
+        // Body styles
+        bodyLarge: AppTextStyles.body1Semi,
+        bodyMedium: AppTextStyles.body2Regular,
+        bodySmall: AppTextStyles.body3Regular,
+        titleMedium: AppTextStyles.body1Semi,
+        titleSmall: AppTextStyles.captionBold,
+        // Legacy mappings for backward compatibility
+        labelLarge: AppTextStyles.body2Regular,
+        labelMedium: AppTextStyles.body3Regular,
+        labelSmall: AppTextStyles.captionRegular,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,

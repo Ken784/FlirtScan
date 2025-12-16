@@ -45,12 +45,12 @@ class RadarAnalysisCard extends StatelessWidget {
                   children: [
                     Text(
                       '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
-                      style: AppTextStyles.bodyEmphasis,
+                      style: AppTextStyles.body2Bold,
                     ),
                     const SizedBox(height: AppSpacing.s4),
                     Text(
                       analysis.description,
-                      style: AppTextStyles.subheadline,
+                      style: AppTextStyles.body3Regular,
                     ),
                   ],
                 ),

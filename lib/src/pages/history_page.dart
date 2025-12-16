@@ -6,6 +6,7 @@ import '../core/models/analysis_result.dart';
 import '../core/providers/analysis_provider.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/theme/app_text_styles.dart';
 import '../core/icons/app_icon_widgets.dart';
 import '../services/storage_service.dart';
 import '../widgets/navigation/page_header.dart';
@@ -94,6 +95,24 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     return name;
   }
 
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     // 檢查是否需要重新載入數據（從 ResultPage 返回時）
@@ -123,25 +142,24 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                 )
               : _history.isEmpty
                   ? ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
                       children: [
                         PageHeader(
                           title: '分析記錄',
                           leading: AppIconWidgets.inbox(),
                         ),
                         const SizedBox(height: AppSpacing.s32),
-                        const Center(
+                        Center(
                           child: Text(
-                            '目前還沒有分析紀錄',
-                            style: TextStyle(color: Colors.white70),
+                            '沒有儲存的紀錄',
+                            style: AppTextStyles.body3Semi.copyWith(color: AppColors.textBlack80),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ],
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
                       itemCount: _history.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
@@ -187,10 +205,9 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                             },
                             child: ListEntryCard(
                               partnerName: _displayName(result),
-                              scoreText:
-                                  '${result.totalScore.round()}/10',
+                              scoreText: '${result.totalScore.round()}',
                               summary: result.toneInsight,
-                              imageBase64: entry.imageBase64,
+                              dateText: _formatDate(result.createdAt),
                               onTap: () => _onItemTap(entry),
                             ),
                           ),

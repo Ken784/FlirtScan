@@ -372,11 +372,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
                     children: [
                       Text(
                         '正在解讀...',
-                        style: AppTextStyles.bodyEmphasis.copyWith(
+                        style: AppTextStyles.body2Semi.copyWith(
                           color: Colors.white.withOpacity(0.8),
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.4,
                         ),
                       ),
                       _AnimatedDots(),
@@ -425,12 +422,12 @@ class _ResultPageState extends ConsumerState<ResultPage>
               const SizedBox(height: AppSpacing.s16),
               Text(
                 '分析失敗',
-                style: AppTextStyles.title2,
+                style: AppTextStyles.header2Semi,
               ),
               const SizedBox(height: AppSpacing.s8),
               Text(
                 errorMessage ?? '未知錯誤',
-                style: AppTextStyles.subheadline,
+                style: AppTextStyles.body3Regular,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.s24),
@@ -607,11 +604,11 @@ class _ResultPageState extends ConsumerState<ResultPage>
                     children: [
                       Text(
                         '查看對話截圖',
-                        style: AppTextStyles.bodyEmphasis.copyWith(
+                        style: AppTextStyles.body2Semi.copyWith(
                           color: AppColors.primary,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s4),
+                      const SizedBox(width: AppSpacing.s8),
                       AppIconWidgets.camera(
                         size: 24,
                         color: AppColors.primary,
@@ -625,7 +622,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
                   children: [
                     Text(
                       '沒有對話截圖',
-                      style: AppTextStyles.subheadline.copyWith(
+                      style: AppTextStyles.body3Regular.copyWith(
                         color: AppColors.textBlack80,
                       ),
                     ),
@@ -636,7 +633,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
               Container(
                 height: 1,
                 width: double.infinity,
-                color: AppColors.secondaryBlue,
+                color: AppColors.primary,
               ),
               const SizedBox(height: AppSpacing.s16),
               // 五個維度詳細分析
@@ -648,13 +645,13 @@ class _ResultPageState extends ConsumerState<ResultPage>
                     children: [
                       Text(
                         '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
-                        style: AppTextStyles.bodyEmphasis,
+                        style: AppTextStyles.body2Bold,
                         textAlign: TextAlign.left,
                       ),
                       const SizedBox(height: AppSpacing.s4),
                       Text(
                         analysis.description,
-                        style: AppTextStyles.subheadline,
+                        style: AppTextStyles.body3Regular,
                         textAlign: TextAlign.left,
                       ),
                     ],
@@ -871,11 +868,8 @@ class _AnimatedDotsState extends State<_AnimatedDots>
                 opacity: opacity,
                 child: Text(
                   '·',
-                  style: AppTextStyles.bodyEmphasis.copyWith(
+                  style: AppTextStyles.body2Semi.copyWith(
                     color: Colors.white.withOpacity(0.8),
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.4,
                   ),
                 ),
               ),

@@ -61,11 +61,9 @@ class ErrorDialog extends StatelessWidget {
             // 標題區域
             Text(
               title,
-              style: AppTextStyles.title2.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-                letterSpacing: -0.26,
+              style: AppTextStyles.body1Semi.copyWith(
+                fontSize: 18,
+                color: AppColors.textBlack,
               ),
               textAlign: TextAlign.left,
             ),
@@ -74,12 +72,7 @@ class ErrorDialog extends StatelessWidget {
             // 訊息區域
             Text(
               message,
-              style: AppTextStyles.body.copyWith(
-                fontSize: 17,
-                fontWeight: FontWeight.w400,
-                color: Colors.black,
-                letterSpacing: -0.43,
-              ),
+              style: AppTextStyles.body3Regular,
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: 40),
@@ -103,11 +96,8 @@ class ErrorDialog extends StatelessWidget {
                 ),
                 child: Text(
                   buttonText ?? '確定',
-                  style: AppTextStyles.bodyEmphasis.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.body2Semi.copyWith(
                     color: AppColors.primary,
-                    letterSpacing: -0.43,
                   ),
                 ),
               ),
