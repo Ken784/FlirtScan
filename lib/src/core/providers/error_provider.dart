@@ -38,9 +38,3 @@ class ErrorNotifier extends StateNotifier<ErrorState> {
 final errorProvider = StateNotifierProvider<ErrorNotifier, ErrorState>((ref) {
   return ErrorNotifier();
 });
-
-
-
-
-
-

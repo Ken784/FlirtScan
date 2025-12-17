@@ -8,10 +8,10 @@ import 'locale_provider.dart';
 
 /// 分析狀態
 enum AnalysisStatus {
-  idle,       // 閒置
-  analyzing,  // 分析中
-  completed,  // 完成
-  error,      // 錯誤
+  idle, // 閒置
+  analyzing, // 分析中
+  completed, // 完成
+  error, // 錯誤
 }
 
 /// 分析狀態類
@@ -70,7 +70,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
     try {
       // 從 localeProvider 取得當前語言代碼
       final language = ref.read(languageCodeProvider);
-      
+
       final result = await _analysisService.analyzeConversation(
         imageBase64: imageBase64,
         language: language,
@@ -112,13 +112,13 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
       final updatedResult = state.result!.copyWith(isAdvancedUnlocked: true);
       state = state.copyWith(result: updatedResult);
 
-       // 將「進階已解鎖」狀態同步回歷史紀錄
-       unawaited(
-         _storageService.saveAnalysis(
-           updatedResult,
-           imageBase64: state.imageBase64,
-         ),
-       );
+      // 將「進階已解鎖」狀態同步回歷史紀錄
+      unawaited(
+        _storageService.saveAnalysis(
+          updatedResult,
+          imageBase64: state.imageBase64,
+        ),
+      );
     }
   }
 
@@ -137,7 +137,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
 }
 
 /// 分析狀態 Provider
-final analysisProvider = StateNotifierProvider<AnalysisNotifier, AnalysisState>((ref) {
+final analysisProvider =
+    StateNotifierProvider<AnalysisNotifier, AnalysisState>((ref) {
   return AnalysisNotifier(ref);
 });
-

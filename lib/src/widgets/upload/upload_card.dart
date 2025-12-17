@@ -51,7 +51,8 @@ class UploadCard extends StatelessWidget {
             child: AppButton(
               label: '選擇對話截圖',
               variant: AppButtonVariant.primary,
-              leading: AppIconWidgets.arrowUpCircle(size: 24, color: Colors.white),
+              leading:
+                  AppIconWidgets.arrowUpCircle(size: 24, color: Colors.white),
               onPressed: onUploadPressed,
             ),
           ),
@@ -69,7 +70,7 @@ class _ChatIcons extends StatelessWidget {
     // chat_bubble.svg 已經包含了兩個對話泡泡的設計
     // 直接使用這個 SVG，不需要翻轉
     final chatColor = AppColors.bgGradientTop.withOpacity(0.8);
-    
+
     return SizedBox(
       height: 107,
       width: 170,
@@ -77,6 +78,3 @@ class _ChatIcons extends StatelessWidget {
     );
   }
 }
-
-
-

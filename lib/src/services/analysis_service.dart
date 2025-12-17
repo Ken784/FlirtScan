@@ -8,10 +8,10 @@ class AnalysisService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
   /// 分析對話截圖
-  /// 
+  ///
   /// [imageBase64] 壓縮後的對話截圖 Base64 字串
   /// [language] App 當前語言代碼（例如：'zh-TW'，預設為 'zh-TW' 作為後備）
-  /// 
+  ///
   /// 返回分析結果
   Future<AnalysisResult> analyzeConversation({
     required String imageBase64,
@@ -22,7 +22,7 @@ class AnalysisService {
 
       // 呼叫 Firebase Function
       final callable = _functions.httpsCallable('analyzeConversation');
-      
+
       final result = await callable.call({
         'imageBase64': imageBase64,
         'language': language,
@@ -41,34 +41,38 @@ class AnalysisService {
       // 檢查是否成功
       if (responseData['success'] == true && responseData['data'] != null) {
         // 同樣需要安全轉換嵌套的 Map
-        final analysisData = Map<String, dynamic>.from(responseData['data'] as Map);
-        
+        final analysisData =
+            Map<String, dynamic>.from(responseData['data'] as Map);
+
         // 確保有 ID：如果 Firebase 沒有返回 ID，生成一個
         if (analysisData['id'] == null) {
           analysisData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
         }
-        
+
         // 轉換為 AnalysisResult
         final analysisResult = AnalysisResult.fromJson(analysisData);
-        
+
         debugPrint('AnalysisService: 分析完成');
         debugPrint('AnalysisService: 結果 ID: ${analysisResult.id}');
         debugPrint('AnalysisService: 總分 ${analysisResult.totalScore}/10');
-        debugPrint('AnalysisService: 關係狀態 ${analysisResult.relationshipStatus}');
-        
+        debugPrint(
+            'AnalysisService: 關係狀態 ${analysisResult.relationshipStatus}');
+
         return analysisResult;
       } else {
         throw Exception('分析服務回傳錯誤: ${responseData['error'] ?? '未知錯誤'}');
       }
     } on FirebaseFunctionsException catch (e) {
-      debugPrint('AnalysisService: Firebase Functions 錯誤 - ${e.code}: ${e.message}');
-      
+      debugPrint(
+          'AnalysisService: Firebase Functions 錯誤 - ${e.code}: ${e.message}');
+
       // 處理特定錯誤
-      if (e.code == 'invalid-argument' && 
+      if (e.code == 'invalid-argument' &&
           e.message?.contains('invalid_image_content') == true) {
-        throw AnalysisException('這似乎不是對話紀錄喔', type: AnalysisExceptionType.invalidImage);
+        throw AnalysisException('這似乎不是對話紀錄喔',
+            type: AnalysisExceptionType.invalidImage);
       }
-      
+
       throw AnalysisException(
         e.message ?? '分析過程中發生錯誤',
         type: AnalysisExceptionType.serverError,
@@ -101,4 +105,3 @@ class AnalysisException implements Exception {
   @override
   String toString() => message;
 }
-

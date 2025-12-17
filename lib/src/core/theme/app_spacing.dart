@@ -23,15 +23,3 @@ class AppSpacing {
   static const EdgeInsets i20 = EdgeInsets.all(s20);
   static const EdgeInsets i24 = EdgeInsets.all(s24);
 }
-
-
-
-
-
-
-
-
-
-
-
-

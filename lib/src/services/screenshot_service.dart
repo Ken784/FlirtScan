@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,7 @@ import 'package:image/image.dart' as img;
 /// 截圖服務：用於生成長截圖並分享
 class ScreenshotService {
   /// 從 RepaintBoundary 生成圖片並分享
-  /// 
+  ///
   /// [repaintBoundaryKey] RepaintBoundary 的 GlobalKey
   /// [pixelRatio] 圖片解析度倍數（預設 3.0，生成高解析度圖片）
   /// [context] BuildContext 用於獲取 sharePositionOrigin（iOS 需要）
@@ -37,9 +36,10 @@ class ScreenshotService {
 
       // 生成圖片
       final ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
-      
+
       // 將圖片轉換為 PNG bytes（用於讀取）
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) {
         throw Exception('無法將圖片轉換為 bytes');
       }
@@ -52,15 +52,16 @@ class ScreenshotService {
       if (decodedImage == null) {
         throw Exception('無法解碼 PNG 圖片');
       }
-      
+
       // 創建帶背景色的圖片（使用漸層背景色）
       // 背景色：從 AppColors.bgGradientTop 到 AppColors.bgGradientBottom
       const bgTop = Color(0xFFFFEEFE); // AppColors.bgGradientTop
       const bgBottom = Color(0xFFE8F2FF); // AppColors.bgGradientBottom
-      
+
       // 創建新圖片，填充背景色
-      final img.Image imageWithBg = img.Image(width: decodedImage.width, height: decodedImage.height);
-      
+      final img.Image imageWithBg =
+          img.Image(width: decodedImage.width, height: decodedImage.height);
+
       // 填充漸層背景
       for (int y = 0; y < imageWithBg.height; y++) {
         final double t = y / imageWithBg.height;
@@ -68,17 +69,18 @@ class ScreenshotService {
         final int r = (bgColor.r * 255.0).round().clamp(0, 255);
         final int g = (bgColor.g * 255.0).round().clamp(0, 255);
         final int b = (bgColor.b * 255.0).round().clamp(0, 255);
-        
+
         for (int x = 0; x < imageWithBg.width; x++) {
           imageWithBg.setPixel(x, y, img.ColorRgb8(r, g, b));
         }
       }
-      
+
       // 將原圖合成到背景上（處理透明像素）
       img.compositeImage(imageWithBg, decodedImage, dstX: 0, dstY: 0);
-      
+
       // 編碼為 JPG
-      final Uint8List jpgBytes = Uint8List.fromList(img.encodeJpg(imageWithBg, quality: 95));
+      final Uint8List jpgBytes =
+          Uint8List.fromList(img.encodeJpg(imageWithBg, quality: 95));
 
       // 保存到臨時文件
       final Directory tempDir = await getTemporaryDirectory();
@@ -88,7 +90,9 @@ class ScreenshotService {
 
       // 分享圖片
       // iOS 需要 sharePositionOrigin 參數
-      if (defaultTargetPlatform == TargetPlatform.iOS && context != null && context.mounted) {
+      if (defaultTargetPlatform == TargetPlatform.iOS &&
+          context != null &&
+          context.mounted) {
         final RenderBox? box = context.findRenderObject() as RenderBox?;
         if (box != null) {
           final sharePositionOrigin = box.localToGlobal(Offset.zero) & box.size;
@@ -130,7 +134,3 @@ class ScreenshotService {
     }
   }
 }
-
-
-
-

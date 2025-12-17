@@ -19,7 +19,6 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/cards/insight_card.dart';
 import '../widgets/cards/score_summary_card.dart';
 import '../widgets/cards/summary_card.dart';
-import '../widgets/charts/radar_chart.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/confirm_delete_dialog.dart';
 import 'result_sentence_page.dart';
@@ -51,13 +50,13 @@ class _ResultPageState extends ConsumerState<ResultPage>
   @override
   void initState() {
     super.initState();
-    
+
     // 初始化掃描動畫（用於「正在解讀...」）
     _scanAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-    
+
     _scanAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _scanAnimationController,
@@ -68,11 +67,11 @@ class _ResultPageState extends ConsumerState<ResultPage>
     _scanAnimation.addListener(() {
       final currentValue = _scanAnimation.value;
       final bool isMovingRight = currentValue >= _previousAnimationValue;
-      
+
       if (_isMovingRightNotifier.value != isMovingRight) {
         _isMovingRightNotifier.value = isMovingRight;
       }
-      
+
       _previousAnimationValue = currentValue;
     });
 
@@ -85,44 +84,6 @@ class _ResultPageState extends ConsumerState<ResultPage>
     _scanAnimationController.dispose();
     _isMovingRightNotifier.dispose();
     super.dispose();
-  }
-
-
-  void _onRadarPointTapped(int index, RadarDataPoint point, AnalysisResult result) {
-    // 根據索引獲取對應的維度描述
-    String description = '';
-    switch (index) {
-      case 0:
-        description = result.emotional.description;
-        break;
-      case 1:
-        description = result.intimacy.description;
-        break;
-      case 2:
-        description = result.playfulness.description;
-        break;
-      case 3:
-        description = result.responsive.description;
-        break;
-      case 4:
-        description = result.balance.description;
-        break;
-    }
-
-    // 顯示對話框
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(point.label),
-        content: Text(description),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('確定'),
-          ),
-        ],
-      ),
-    );
   }
 
   /// 處理進階分析按鈕點擊
@@ -153,7 +114,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
 
       // 等待廣告載入
       await _adService.loadRewardedAd();
-      
+
       // 再次檢查廣告是否載入成功
       if (!_adService.isAdLoaded) {
         if (mounted) {
@@ -177,7 +138,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
         // 用戶看完廣告，解鎖進階分析
         debugPrint('ResultPage: 用戶看完廣告，解鎖進階分析');
         ref.read(analysisProvider.notifier).unlockAdvancedAnalysis();
-        
+
         // 跳轉到進階分析頁面
         if (mounted) {
           _navigateToAdvancedAnalysis();
@@ -217,7 +178,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
   Future<void> _handleDelete() async {
     final analysisState = ref.read(analysisProvider);
     final result = analysisState.result;
-    
+
     if (result == null) {
       return;
     }
@@ -229,7 +190,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
       // 刪除分析結果（使用 historyProvider）
       try {
         await ref.read(historyProvider.notifier).deleteById(result.id);
-        
+
         // 返回上一頁
         if (mounted) {
           context.pop();
@@ -299,7 +260,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
   Widget build(BuildContext context) {
     // 監聽分析狀態
     final analysisState = ref.watch(analysisProvider);
-    
+
     // 監聽分析錯誤，如果有錯誤則返回 HomePage
     ref.listen<AnalysisState>(analysisProvider, (previous, next) {
       if (next.hasError && mounted) {
@@ -308,7 +269,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
         context.pop();
       }
     });
-    
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -321,14 +282,14 @@ class _ResultPageState extends ConsumerState<ResultPage>
         child: SafeArea(
           child: analysisState.isAnalyzing
               ? _buildAnalyzingView()
-                  : analysisState.hasError
-                      ? _buildErrorView(analysisState.errorMessage)
-                      : analysisState.result != null
-                          ? _buildResultView(
-                              analysisState.result!,
-                              analysisState.imageBase64 ?? widget.imageBase64,
-                            )
-                          : _buildEmptyView(),
+              : analysisState.hasError
+                  ? _buildErrorView(analysisState.errorMessage)
+                  : analysisState.result != null
+                      ? _buildResultView(
+                          analysisState.result!,
+                          analysisState.imageBase64 ?? widget.imageBase64,
+                        )
+                      : _buildEmptyView(),
         ),
       ),
     );
@@ -400,7 +361,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
 
   Widget _buildErrorView(String? errorMessage) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
         PageHeader(
           title: '分析結果',
@@ -444,7 +406,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
 
   Widget _buildEmptyView() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
       children: [
         PageHeader(
           title: '分析結果',
@@ -468,32 +431,6 @@ class _ResultPageState extends ConsumerState<ResultPage>
   }
 
   Widget _buildResultView(AnalysisResult result, String? imageBase64) {
-    
-    // 準備雷達圖數據（保持 0-1 的值，讓 fl_chart 內部轉換為 0-10）
-    // fl_chart 會將 value * 10 來顯示在圖表上
-    final radarDataPoints = [
-      RadarDataPoint(
-        label: '情緒投入度',
-        value: (result.emotional.score / 10.0).clamp(0.0, 1.0),
-      ),
-      RadarDataPoint(
-        label: '語氣親密度',
-        value: (result.intimacy.score / 10.0).clamp(0.0, 1.0),
-      ),
-      RadarDataPoint(
-        label: '玩笑 / 調情程度',
-        value: (result.playfulness.score / 10.0).clamp(0.0, 1.0),
-      ),
-      RadarDataPoint(
-        label: '回覆積極度',
-        value: (result.responsive.score / 10.0).clamp(0.0, 1.0),
-      ),
-      RadarDataPoint(
-        label: '互動平衡度',
-        value: (result.balance.score / 10.0).clamp(0.0, 1.0),
-      ),
-    ];
-
     // 準備維度分析列表
     final dimensionAnalyses = [
       DimensionAnalysis(
@@ -532,7 +469,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
     final summaryLines = result.summary.split('\n');
     String summaryContent = '';
     List<String> bulletPoints = [];
-    
+
     for (final line in summaryLines) {
       if (line.trim().isEmpty) continue;
       if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
@@ -560,131 +497,135 @@ class _ResultPageState extends ConsumerState<ResultPage>
           key: _repaintBoundaryKey,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
             child: Column(
               children: [
-          PageHeader(
-          title: '分析結果',
-          leading: AppIconWidgets.arrowBack(),
-          trailing: AppIconWidgets.delete(),
-          onTrailingTap: _handleDelete,
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        ScoreSummaryCard(
-          title: '曖昧指數',
-          stateText: result.relationshipStatus,
-          scoreMajor: result.totalScore.round(),
-          scoreMinor: 10,
-        ),
-        const SizedBox(height: AppSpacing.s24),
-        // 評分分析卡片（查看對話截圖 + 五個維度說明）
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(AppSpacing.s24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 查看對話截圖
-              if (imageBase64 != null)
-                GestureDetector(
-                  onTap: () => _showConversationImage(imageBase64),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '查看對話截圖',
-                        style: AppTextStyles.body2Semi.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.s8),
-                      AppIconWidgets.camera(
-                        size: 24,
-                        color: AppColors.primary,
+                PageHeader(
+                  title: '分析結果',
+                  leading: AppIconWidgets.arrowBack(),
+                  trailing: AppIconWidgets.delete(),
+                  onTrailingTap: _handleDelete,
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                ScoreSummaryCard(
+                  title: '曖昧指數',
+                  stateText: result.relationshipStatus,
+                  scoreMajor: result.totalScore.round(),
+                  scoreMinor: 10,
+                ),
+                const SizedBox(height: AppSpacing.s24),
+                // 評分分析卡片（查看對話截圖 + 五個維度說明）
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                )
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '沒有對話截圖',
-                      style: AppTextStyles.body3Regular.copyWith(
-                        color: AppColors.textBlack80,
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: AppSpacing.s16),
-              // 分隔線
-              Container(
-                height: 1,
-                width: double.infinity,
-                color: AppColors.primary,
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              // 五個維度詳細分析
-              ...dimensionAnalyses.map(
-                (analysis) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s16),
+                  padding: const EdgeInsets.all(AppSpacing.s24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
-                        style: AppTextStyles.body2Bold,
-                        textAlign: TextAlign.left,
+                      // 查看對話截圖
+                      if (imageBase64 != null)
+                        GestureDetector(
+                          onTap: () => _showConversationImage(imageBase64),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '查看對話截圖',
+                                style: AppTextStyles.body2Semi.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s8),
+                              AppIconWidgets.camera(
+                                size: 24,
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '沒有對話截圖',
+                              style: AppTextStyles.body3Regular.copyWith(
+                                color: AppColors.textBlack80,
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: AppSpacing.s16),
+                      // 分隔線
+                      Container(
+                        height: 1,
+                        width: double.infinity,
+                        color: AppColors.primary,
                       ),
-                      const SizedBox(height: AppSpacing.s4),
-                      Text(
-                        analysis.description,
-                        style: AppTextStyles.body3Regular,
-                        textAlign: TextAlign.left,
+                      const SizedBox(height: AppSpacing.s16),
+                      // 五個維度詳細分析
+                      ...dimensionAnalyses.map(
+                        (analysis) => Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: AppSpacing.s16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${analysis.title} (${analysis.score}/${analysis.maxScore})：',
+                                style: AppTextStyles.body2Bold,
+                                textAlign: TextAlign.left,
+                              ),
+                              const SizedBox(height: AppSpacing.s4),
+                              Text(
+                                analysis.description,
+                                style: AppTextStyles.body3Regular,
+                                textAlign: TextAlign.left,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        InsightCard(
-          title: '🔍 語氣洞察',
-          body: result.toneInsight,
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        SummaryCard(
-          title: '✨ 總結',
-          content: summaryContent,
-          bulletPoints: bulletPoints,
-        ),
-        const SizedBox(height: AppSpacing.s24),
-        AppButton(
-          label: '進階逐句分析',
-          variant: AppButtonVariant.primary,
-          leading: AppIconWidgets.list(size: 24, color: Colors.white),
-          onPressed: _isLoadingAd ? null : () => _handleAdvancedAnalysis(result),
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        AppButton(
-          label: '截圖',
-          variant: AppButtonVariant.primary,
-          leading: AppIconWidgets.camera(size: 24, color: Colors.white),
-          onPressed: () => _handleScreenshot(),
-        ),
+                const SizedBox(height: AppSpacing.s16),
+                InsightCard(
+                  title: '🔍 語氣洞察',
+                  body: result.toneInsight,
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                SummaryCard(
+                  title: '✨ 總結',
+                  content: summaryContent,
+                  bulletPoints: bulletPoints,
+                ),
+                const SizedBox(height: AppSpacing.s24),
+                AppButton(
+                  label: '進階逐句分析',
+                  variant: AppButtonVariant.primary,
+                  leading: AppIconWidgets.list(size: 24, color: Colors.white),
+                  onPressed: _isLoadingAd
+                      ? null
+                      : () => _handleAdvancedAnalysis(result),
+                ),
+                const SizedBox(height: AppSpacing.s16),
+                AppButton(
+                  label: '截圖',
+                  variant: AppButtonVariant.primary,
+                  leading: AppIconWidgets.camera(size: 24, color: Colors.white),
+                  onPressed: () => _handleScreenshot(),
+                ),
               ],
             ),
           ),
@@ -707,10 +648,11 @@ class _ResultPageState extends ConsumerState<ResultPage>
       }
 
       // 滾動到頂部，確保所有內容都已渲染
-      final ScrollController? scrollController = _repaintBoundaryKey.currentContext
+      final ScrollController? scrollController = _repaintBoundaryKey
+          .currentContext
           ?.findAncestorWidgetOfExactType<SingleChildScrollView>()
           ?.controller;
-      
+
       if (scrollController != null && scrollController.hasClients) {
         await scrollController.animateTo(
           0,
@@ -726,6 +668,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
       await Future.delayed(const Duration(milliseconds: 200));
 
       // 生成截圖並分享
+      if (!mounted) return;
       await _screenshotService.captureAndShare(
         repaintBoundaryKey: _repaintBoundaryKey,
         pixelRatio: 3.0, // 高解析度
@@ -772,7 +715,8 @@ class _ScanGradientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double scanWidth = 96;
-    final double scanLeft = -scanWidth + animationValue * (size.width + scanWidth * 2);
+    final double scanLeft =
+        -scanWidth + animationValue * (size.width + scanWidth * 2);
 
     final LinearGradient gradient;
     if (isMovingRight) {
@@ -846,21 +790,23 @@ class _AnimatedDotsState extends State<_AnimatedDots>
             final double segmentStart = index / 3.0;
             final double segmentEnd = (index + 1) / 3.0;
             final double segmentDuration = segmentEnd - segmentStart;
-            
+
             double localProgress = 0.0;
-            if (_controller.value >= segmentStart && _controller.value <= segmentEnd) {
-              localProgress = (_controller.value - segmentStart) / segmentDuration;
+            if (_controller.value >= segmentStart &&
+                _controller.value <= segmentEnd) {
+              localProgress =
+                  (_controller.value - segmentStart) / segmentDuration;
             } else if (_controller.value > segmentEnd) {
               localProgress = 1.0;
             }
-            
+
             double opacity;
             if (localProgress < 0.7) {
               opacity = (localProgress / 0.7).clamp(0.0, 1.0);
             } else {
               opacity = ((1.0 - localProgress) / 0.3).clamp(0.0, 1.0);
             }
-            
+
             return Padding(
               padding: const EdgeInsets.only(left: 2),
               child: Opacity(

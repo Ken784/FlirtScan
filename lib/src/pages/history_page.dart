@@ -52,7 +52,6 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     }
   }
 
-
   void _onItemTap(AnalysisHistoryEntry entry) {
     // 將歷史結果寫入 analysisProvider，讓 ResultPage / ResultSentencePage 可共用
     ref.read(analysisProvider.notifier).loadFromHistory(
@@ -101,7 +100,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     // 監聽歷史記錄狀態
     final historyState = ref.watch(historyProvider);
     final history = historyState.entries;
-    
+
     // 檢查是否需要重新載入數據（從 ResultPage 返回時）
     if (_shouldReloadOnNextBuild) {
       _shouldReloadOnNextBuild = false;
@@ -112,7 +111,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         }
       });
     }
-    
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -129,7 +128,8 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                 )
               : history.isEmpty
                   ? ListView(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.s20, 0, AppSpacing.s20, 120),
                       children: [
                         PageHeader(
                           title: '分析記錄',
@@ -139,14 +139,16 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                         Center(
                           child: Text(
                             '沒有儲存的紀錄',
-                            style: AppTextStyles.body3Semi.copyWith(color: AppColors.textBlack80),
+                            style: AppTextStyles.body3Semi
+                                .copyWith(color: AppColors.textBlack80),
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ],
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.s20, 0, AppSpacing.s20, 120),
                       itemCount: history.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
@@ -218,4 +220,3 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     );
   }
 }
-

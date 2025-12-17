@@ -41,7 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     try {
       // 使用 ImageService 選取圖片（會檢查檔案大小）
       final File? imageFile = await _imageService.pickImage();
-      
+
       if (imageFile != null) {
         // 立即更新 UI 顯示原始圖片
         setState(() {
@@ -49,7 +49,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           _preparedBase64String = null; // 重置 Base64
           _isProcessing = true;
         });
-        
+
         // 非同步執行壓縮與 Base64 轉換
         _compressAndPrepareImage(imageFile);
       }
@@ -68,14 +68,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 非同步壓縮圖片並轉換為 Base64
   Future<void> _compressAndPrepareImage(File imageFile) async {
     try {
-      final ImageProcessResult result = await _imageService.compressAndConvertToBase64(imageFile);
-      
+      final ImageProcessResult result =
+          await _imageService.compressAndConvertToBase64(imageFile);
+
       // 在 Console 印出 Base64 前 100 個字元
-      final String preview = result.base64String.length > 100 
-          ? result.base64String.substring(0, 100) 
+      final String preview = result.base64String.length > 100
+          ? result.base64String.substring(0, 100)
           : result.base64String;
       debugPrint('HomePage: Base64 前 100 個字元: $preview');
-      
+
       if (mounted) {
         setState(() {
           _preparedBase64String = result.base64String;
@@ -117,13 +118,13 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     try {
       debugPrint('準備開始分析（圖片長度：${_preparedBase64String!.length}）');
-      
+
       // 使用 analysisProvider 開始背景分析
       ref.read(analysisProvider.notifier).analyze(_preparedBase64String!);
 
       // 播放全螢幕廣告
       await _showAd();
-      
+
       if (mounted) {
         setState(() {
           _isAnalyzing = false;
@@ -136,9 +137,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           _isAnalyzing = false;
         });
         ref.read(errorProvider.notifier).showError(
-          '發生錯誤: ${e.toString()}',
-          title: AppLocalizations.of(context)!.errorTitle,
-        );
+              '發生錯誤: ${e.toString()}',
+              title: AppLocalizations.of(context)!.errorTitle,
+            );
       }
     }
   }
@@ -146,15 +147,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 顯示全螢幕獎勵廣告
   Future<void> _showAd() async {
     final adService = AdService();
-    
+
     // 檢查廣告是否已載入
     if (!adService.isAdLoaded) {
       // 廣告未載入，顯示錯誤
       if (mounted) {
         ref.read(errorProvider.notifier).showError(
-          AppLocalizations.of(context)!.errorAdNotLoaded,
-          title: AppLocalizations.of(context)!.errorTitle,
-        );
+              AppLocalizations.of(context)!.errorAdNotLoaded,
+              title: AppLocalizations.of(context)!.errorTitle,
+            );
       }
       return;
     }
@@ -179,9 +180,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         // 廣告播放失敗
         if (mounted) {
           ref.read(errorProvider.notifier).showError(
-            AppLocalizations.of(context)!.errorAdNotLoaded,
-            title: AppLocalizations.of(context)!.errorTitle,
-          );
+                AppLocalizations.of(context)!.errorAdNotLoaded,
+                title: AppLocalizations.of(context)!.errorTitle,
+              );
         }
       },
       onAdInterrupted: () {
@@ -196,7 +197,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 顯示全螢幕圖片預覽
   void _showImagePreview() {
     if (_selectedImage == null) return;
-    
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
@@ -219,30 +220,31 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     // 監聽錯誤狀態
     final errorState = ref.watch(errorProvider);
-    
+
     // 監聽分析錯誤（必須在 build 方法中）
     ref.listen<AnalysisState>(analysisProvider, (previous, next) {
       if (next.hasError && mounted && !errorState.hasError) {
         debugPrint('HomePage: 偵測到分析錯誤，中斷廣告播放');
-        
+
         // 中斷廣告播放
         final adService = AdService();
         if (adService.isAdShowing) {
           adService.interruptAd();
         }
-        
+
         // 顯示錯誤
         ref.read(errorProvider.notifier).showError(
-          next.errorMessage ?? AppLocalizations.of(context)!.errorAnalysisFailed,
-          title: AppLocalizations.of(context)!.errorTitle,
-        );
-        
+              next.errorMessage ??
+                  AppLocalizations.of(context)!.errorAnalysisFailed,
+              title: AppLocalizations.of(context)!.errorTitle,
+            );
+
         setState(() {
           _isAnalyzing = false;
         });
       }
     });
-    
+
     return Stack(
       children: [
         // 主要內容
@@ -257,7 +259,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
             child: SafeArea(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.s20, 0, AppSpacing.s20, 120),
                 children: [
                   // 標題欄
                   PageHeader(
@@ -265,7 +268,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     leading: AppIconWidgets.heartOutline(size: 24),
                   ),
                   // 主要內容區域
-                  if (_selectedImage == null) ..._buildInitialStateContent() else ..._buildImagePreviewStateContent(),
+                  if (_selectedImage == null)
+                    ..._buildInitialStateContent()
+                  else
+                    ..._buildImagePreviewStateContent(),
                 ],
               ),
             ),
@@ -283,10 +289,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             },
           ),
         ),
-        
+
         // 錯誤遮罩和對話框
-        if (errorState.hasError)
-          _buildErrorOverlay(errorState),
+        if (errorState.hasError) _buildErrorOverlay(errorState),
       ],
     );
   }
@@ -318,8 +323,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       const SizedBox(height: AppSpacing.s24),
       // 說明區域
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.s16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
@@ -414,13 +419,15 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (_isProcessing)
         Text(
           '正在處理圖片...',
-          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          style:
+              AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
           textAlign: TextAlign.center,
         )
       else if (_isAnalyzing)
         Text(
           '正在分析對話...',
-          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          style:
+              AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
           textAlign: TextAlign.center,
         )
       else if (_preparedBase64String != null)
@@ -434,9 +441,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       AppButton(
         label: _isAnalyzing ? '分析中...' : '開始分析對話',
         variant: AppButtonVariant.primary,
-        onPressed: _preparedBase64String != null && !_isProcessing && !_isAnalyzing
-            ? _startAnalysis
-            : null, // 未準備完成時禁用按鈕
+        onPressed:
+            _preparedBase64String != null && !_isProcessing && !_isAnalyzing
+                ? _startAnalysis
+                : null, // 未準備完成時禁用按鈕
       ),
       const SizedBox(height: AppSpacing.s16),
       // 說明文字
@@ -444,7 +452,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
         child: Text(
           '深度解析對話中的情緒、語氣與曖昧指數，還能生成雷達圖和可分享的金句！',
-          style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+          style:
+              AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
           textAlign: TextAlign.center,
         ),
       ),
@@ -456,7 +465,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.text});
   final String text;
-  
+
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -469,7 +478,7 @@ class _SectionTitle extends StatelessWidget {
 class _CheckItem extends StatelessWidget {
   const _CheckItem({required this.text});
   final String text;
-  
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -479,15 +488,11 @@ class _CheckItem extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
+            style: AppTextStyles.body3Regular
+                .copyWith(color: AppColors.textBlack80),
           ),
         ),
       ],
     );
   }
 }
-
-
-
-
-

@@ -68,7 +68,7 @@ class ErrorDialog extends StatelessWidget {
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: 16),
-            
+
             // 訊息區域
             Text(
               message,
@@ -76,7 +76,7 @@ class ErrorDialog extends StatelessWidget {
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: 40),
-            
+
             // 按鈕（次要按鈕樣式：白色背景 + 紅色邊框）
             SizedBox(
               width: double.infinity,
@@ -92,7 +92,8 @@ class ErrorDialog extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
                 child: Text(
                   buttonText ?? '確定',
@@ -108,4 +109,3 @@ class ErrorDialog extends StatelessWidget {
     );
   }
 }
-

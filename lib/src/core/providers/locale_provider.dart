@@ -21,4 +21,3 @@ final languageCodeProvider = Provider<String>((ref) {
   final locale = ref.watch(localeProvider);
   return localeToLanguageCode(locale);
 });
-

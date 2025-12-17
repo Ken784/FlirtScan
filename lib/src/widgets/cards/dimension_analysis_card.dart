@@ -46,10 +46,3 @@ class DimensionAnalysisCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-

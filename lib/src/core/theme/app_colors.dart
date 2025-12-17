@@ -38,15 +38,3 @@ class AppColors {
   @Deprecated('Use AppColors.green instead')
   static const Color success = green;
 }
-
-
-
-
-
-
-
-
-
-
-
-

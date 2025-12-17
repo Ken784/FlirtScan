@@ -23,7 +23,7 @@ class BottomNav extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Container(
+        child: SizedBox(
           height: AppSpacing.s52,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -82,9 +82,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-

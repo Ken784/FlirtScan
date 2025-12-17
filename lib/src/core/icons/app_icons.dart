@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 /// 應用程式圖標庫
 /// 管理所有自定義圖標資源
-/// 
+///
 /// 注意：如果 SVG 文件不存在，會顯示錯誤信息
 @immutable
 class AppIcons {
@@ -50,9 +50,8 @@ class AppIcons {
       assetName,
       width: width,
       height: height,
-      colorFilter: color != null
-          ? ColorFilter.mode(color, BlendMode.srcIn)
-          : null,
+      colorFilter:
+          color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null,
       fit: fit,
       // 如果找不到文件，顯示錯誤信息
       errorBuilder: (context, error, stackTrace) {

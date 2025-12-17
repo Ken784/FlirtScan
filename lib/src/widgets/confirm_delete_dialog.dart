@@ -72,14 +72,14 @@ class ConfirmDeleteDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.s16),
-            
+
             // 訊息內容
             Text(
               message ?? '確定要刪除這筆分析結果嗎？此操作無法復原。',
               style: AppTextStyles.body3Regular,
             ),
             const SizedBox(height: AppSpacing.s24),
-            
+
             // 確定按鈕（主要按鈕：紅色背景 + 白色文字）
             SizedBox(
               width: double.infinity,
@@ -107,7 +107,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.s12),
-            
+
             // 取消按鈕（次要按鈕：白色背景 + 紅色文字 + 紅色邊框）
             SizedBox(
               width: double.infinity,
@@ -142,8 +142,3 @@ class ConfirmDeleteDialog extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

@@ -92,10 +92,3 @@ class ListEntryCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-

@@ -27,7 +27,9 @@ class QuoteAnalysisCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bubbleColor = side == QuoteSide.opponent ? AppColors.secondaryYellow : AppColors.secondaryBlue;
+    final Color bubbleColor = side == QuoteSide.opponent
+        ? AppColors.secondaryYellow
+        : AppColors.secondaryBlue;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -42,19 +44,22 @@ class QuoteAnalysisCard extends StatelessWidget {
           Container(
             width: double.infinity, // 撐滿卡片寬度
             decoration: BoxDecoration(
-              color: bubbleColor, 
+              color: bubbleColor,
               borderRadius: const BorderRadius.all(AppRadii.r16),
             ),
             padding: const EdgeInsets.all(AppSpacing.s16),
             child: Text(
-              '"$quote"', 
-              style: AppTextStyles.body3Semi.copyWith(color: AppColors.textBlack),
+              '"$quote"',
+              style:
+                  AppTextStyles.body3Semi.copyWith(color: AppColors.textBlack),
             ),
           ),
           const SizedBox(height: AppSpacing.s16),
           Text('背後含意', style: AppTextStyles.body3Bold),
           const SizedBox(height: AppSpacing.s4),
-          Text(meaning, style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80)),
+          Text(meaning,
+              style: AppTextStyles.body3Regular
+                  .copyWith(color: AppColors.textBlack80)),
           const SizedBox(height: AppSpacing.s16),
           // 曖昧指數標題
           Text('曖昧指數', style: AppTextStyles.body3Bold),
@@ -76,7 +81,9 @@ class QuoteAnalysisCard extends StatelessWidget {
           ),
           if (reason != null && reason!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.s4),
-            Text(reason!, style: AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80)),
+            Text(reason!,
+                style: AppTextStyles.body3Regular
+                    .copyWith(color: AppColors.textBlack80)),
           ],
         ],
       ),
@@ -103,10 +110,3 @@ class _Stars extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-

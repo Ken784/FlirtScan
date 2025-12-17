@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
@@ -90,7 +89,8 @@ class _ScoreSummaryCardState extends State<ScoreSummaryCard>
             animation: _animation,
             builder: (context, child) {
               // 動畫：從 0 跳動到目標值
-              final animatedScore = (widget.scoreMajor * _animation.value).round();
+              final animatedScore =
+                  (widget.scoreMajor * _animation.value).round();
               return RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
@@ -126,10 +126,3 @@ class _ScoreSummaryCardState extends State<ScoreSummaryCard>
     );
   }
 }
-
-
-
-
-
-
-

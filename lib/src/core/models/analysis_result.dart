@@ -126,7 +126,9 @@ class AnalysisResult {
   factory AnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
     return AnalysisResult(
       // 優先使用傳入的 id，否則從 JSON 中讀取，最後才生成新的
-      id: id ?? (json['id'] as String?) ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: id ??
+          (json['id'] as String?) ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
@@ -218,4 +220,3 @@ class AnalysisResult {
     );
   }
 }
-

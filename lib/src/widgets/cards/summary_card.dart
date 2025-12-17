@@ -80,4 +80,3 @@ class SummaryCard extends StatelessWidget {
     );
   }
 }
-

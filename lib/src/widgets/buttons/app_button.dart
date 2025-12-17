@@ -38,12 +38,12 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.secondary:
         bg = Colors.white;
         fg = disabled ? AppColors.primary.withOpacity(0.5) : AppColors.primary;
-        border = BorderSide(color: AppColors.primary, width: 1);
+        border = const BorderSide(color: AppColors.primary, width: 1);
         break;
       case AppButtonVariant.tertiary:
         bg = Colors.transparent;
         fg = disabled ? Colors.black38 : AppColors.textBlack;
-        border = BorderSide(color: Colors.black12, width: 1);
+        border = const BorderSide(color: Colors.black12, width: 1);
         break;
     }
 
@@ -57,8 +57,10 @@ class AppButton extends StatelessWidget {
             elevation: 0,
             backgroundColor: bg,
             foregroundColor: fg,
-            shape: RoundedRectangleBorder(borderRadius: AppRadii.pill, side: border ?? BorderSide.none),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s20, vertical: AppSpacing.s12),
+            shape: RoundedRectangleBorder(
+                borderRadius: AppRadii.pill, side: border ?? BorderSide.none),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s20, vertical: AppSpacing.s12),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -81,15 +83,3 @@ class AppButton extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-

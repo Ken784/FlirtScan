@@ -51,4 +51,3 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.kenhuang.flirtscan',
   );
 }
-

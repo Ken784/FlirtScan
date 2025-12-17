@@ -3,7 +3,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
-import '../core/theme/app_text_styles.dart';
 import '../core/icons/app_icon_widgets.dart';
 import '../core/providers/analysis_provider.dart';
 import '../core/models/analysis_result.dart';
@@ -39,10 +38,11 @@ class _ResultSentencePageState extends ConsumerState<ResultSentencePage> {
       }
 
       // 滾動到頂部，確保所有內容都已渲染
-      final ScrollController? scrollController = _repaintBoundaryKey.currentContext
+      final ScrollController? scrollController = _repaintBoundaryKey
+          .currentContext
           ?.findAncestorWidgetOfExactType<SingleChildScrollView>()
           ?.controller;
-      
+
       if (scrollController != null && scrollController.hasClients) {
         await scrollController.animateTo(
           0,
@@ -58,6 +58,7 @@ class _ResultSentencePageState extends ConsumerState<ResultSentencePage> {
       await Future.delayed(const Duration(milliseconds: 200));
 
       // 生成截圖並分享
+      if (!mounted) return;
       await _screenshotService.captureAndShare(
         repaintBoundaryKey: _repaintBoundaryKey,
         pixelRatio: 3.0, // 高解析度
@@ -135,50 +136,55 @@ class _ResultSentencePageState extends ConsumerState<ResultSentencePage> {
                 key: _repaintBoundaryKey,
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.s20, 0, AppSpacing.s20, AppSpacing.s24),
                   child: Column(
                     children: [
-              PageHeader(title: '逐句分析', leading: AppIconWidgets.arrowBack()),
-              const SizedBox(height: AppSpacing.s16),
-              
-              // 逐句分析卡片 - 根據發話者對齊
-              ...result.sentences.asMap().entries.map((entry) {
-                final sentence = entry.value;
-                final isLastItem = entry.key == result.sentences.length - 1;
-                final isMe = sentence.speaker == Speaker.me;
-                
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: isLastItem ? 0 : AppSpacing.s16,
-                    // Partner 左對齊，Me 右對齊
-                    left: isMe ? AppSpacing.s24 : 0,
-                    right: isMe ? 0 : AppSpacing.s24,
-                  ),
-                  child: QuoteAnalysisCard(
-                    side: isMe ? QuoteSide.me : QuoteSide.opponent,
-                    quote: sentence.originalText,
-                    meaning: sentence.hiddenMeaning,
-                    rating: sentence.flirtScore,
-                    ratingPercent: (sentence.flirtScore * 10).clamp(0, 100),
-                    reason: sentence.scoreReason,
-                  ),
-                );
-              }),
-              
-              const SizedBox(height: AppSpacing.s24),
-              
-              // 進階總結卡片
-              AdvancedSummaryCard(summary: result.advancedSummary),
-              
-              const SizedBox(height: AppSpacing.s24),
-              
-                // 截圖按鈕
-                AppButton(
-                  label: '截圖',
-                  variant: AppButtonVariant.primary,
-                  leading: AppIconWidgets.camera(size: 24, color: Colors.white),
-                  onPressed: () => _handleScreenshot(),
-                ),
+                      PageHeader(
+                          title: '逐句分析', leading: AppIconWidgets.arrowBack()),
+                      const SizedBox(height: AppSpacing.s16),
+
+                      // 逐句分析卡片 - 根據發話者對齊
+                      ...result.sentences.asMap().entries.map((entry) {
+                        final sentence = entry.value;
+                        final isLastItem =
+                            entry.key == result.sentences.length - 1;
+                        final isMe = sentence.speaker == Speaker.me;
+
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: isLastItem ? 0 : AppSpacing.s16,
+                            // Partner 左對齊，Me 右對齊
+                            left: isMe ? AppSpacing.s24 : 0,
+                            right: isMe ? 0 : AppSpacing.s24,
+                          ),
+                          child: QuoteAnalysisCard(
+                            side: isMe ? QuoteSide.me : QuoteSide.opponent,
+                            quote: sentence.originalText,
+                            meaning: sentence.hiddenMeaning,
+                            rating: sentence.flirtScore,
+                            ratingPercent:
+                                (sentence.flirtScore * 10).clamp(0, 100),
+                            reason: sentence.scoreReason,
+                          ),
+                        );
+                      }),
+
+                      const SizedBox(height: AppSpacing.s24),
+
+                      // 進階總結卡片
+                      AdvancedSummaryCard(summary: result.advancedSummary),
+
+                      const SizedBox(height: AppSpacing.s24),
+
+                      // 截圖按鈕
+                      AppButton(
+                        label: '截圖',
+                        variant: AppButtonVariant.primary,
+                        leading: AppIconWidgets.camera(
+                            size: 24, color: Colors.white),
+                        onPressed: () => _handleScreenshot(),
+                      ),
                     ],
                   ),
                 ),
@@ -190,9 +196,3 @@ class _ResultSentencePageState extends ConsumerState<ResultSentencePage> {
     );
   }
 }
-
-
-
-
-
-

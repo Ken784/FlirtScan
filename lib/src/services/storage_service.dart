@@ -54,7 +54,7 @@ class StorageService {
   }) async {
     const maxRetries = 3;
     int retryCount = 0;
-    
+
     while (retryCount < maxRetries) {
       final prefs = await SharedPreferences.getInstance();
       // 在每次重試時重新讀取最新資料，確保基於最新狀態操作
@@ -84,12 +84,12 @@ class StorageService {
       filtered.insert(0, encoded);
 
       final success = await prefs.setStringList(_historyKey, filtered);
-      
+
       // 如果寫入成功，完成操作
       if (success) {
         return;
       }
-      
+
       // 如果寫入失敗，重試
       retryCount++;
       if (retryCount < maxRetries) {
@@ -128,7 +128,7 @@ class StorageService {
   Future<void> deleteAnalysis(String id) async {
     const maxRetries = 3;
     int retryCount = 0;
-    
+
     while (retryCount < maxRetries) {
       final prefs = await SharedPreferences.getInstance();
       final List<String> rawList = prefs.getStringList(_historyKey) ?? [];
@@ -154,19 +154,20 @@ class StorageService {
       // 如果找到了要刪除的 ID，執行刪除並退出
       if (deletedCount > 0) {
         final success = await prefs.setStringList(_historyKey, filtered);
-        
+
         // 驗證刪除是否成功
         if (success) {
           final verifyList = prefs.getStringList(_historyKey) ?? [];
           final verifyIds = <String>[];
           for (final item in verifyList) {
             try {
-              final Map<String, dynamic> map = jsonDecode(item) as Map<String, dynamic>;
+              final Map<String, dynamic> map =
+                  jsonDecode(item) as Map<String, dynamic>;
               final entry = AnalysisHistoryEntry.fromJson(map);
               verifyIds.add(entry.result.id);
             } catch (_) {}
           }
-          
+
           // 如果驗證時發現目標 ID 仍然存在，可能是寫入後又被更新了，需要重試
           if (verifyIds.contains(id) && retryCount < maxRetries - 1) {
             retryCount++;
@@ -175,7 +176,7 @@ class StorageService {
           return; // 刪除成功或已達最大重試次數
         }
       }
-      
+
       // 如果沒找到目標 ID 或寫入失敗，可能是儲存已被更新，重試一次
       if (retryCount < maxRetries - 1) {
         retryCount++;
@@ -183,10 +184,9 @@ class StorageService {
         await Future.delayed(const Duration(milliseconds: 50));
         continue;
       }
-      
+
       // 已達最大重試次數，目標 ID 不存在，視為成功（可能已被其他操作刪除）
       return;
     }
   }
 }
-

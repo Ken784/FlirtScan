@@ -104,17 +104,4 @@ class AppTextStyles {
     height: 18,
     weight: FontWeight.w400,
   );
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

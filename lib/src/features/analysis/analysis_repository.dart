@@ -8,10 +8,10 @@ class AnalysisRepository {
   final AnalysisService _analysisService = AnalysisService();
 
   /// 分析對話截圖
-  /// 
+  ///
   /// [imageBase64] 壓縮後的對話截圖 Base64 字串
   /// [language] App 當前語言代碼（例如：'zh-TW'，預設為 'zh-TW' 作為後備）
-  /// 
+  ///
   /// 返回分析結果
   Future<AnalysisResult> analyzeConversation({
     required String imageBase64,
@@ -27,7 +27,8 @@ class AnalysisRepository {
 
       debugPrint('AnalysisRepository: 分析完成');
       debugPrint('AnalysisRepository: 總分 ${analysisResult.totalScore}/10');
-      debugPrint('AnalysisRepository: 關係狀態 ${analysisResult.relationshipStatus}');
+      debugPrint(
+          'AnalysisRepository: 關係狀態 ${analysisResult.relationshipStatus}');
 
       return analysisResult;
     } on AnalysisException catch (e) {
@@ -42,9 +43,3 @@ class AnalysisRepository {
     }
   }
 }
-
-
-
-
-
-

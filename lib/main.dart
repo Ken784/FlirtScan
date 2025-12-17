@@ -10,16 +10,16 @@ import 'src/core/providers/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 初始化 Firebase
   await FirebaseConfig.initialize();
-  
+
   // 初始化 Google Mobile Ads
   await AdService.initialize();
-  
+
   // 預載廣告
   AdService().loadRewardedAd();
-  
+
   runApp(
     const ProviderScope(
       child: FlirtScanApp(),
@@ -35,7 +35,7 @@ class FlirtScanApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     // 使用 localeProvider 管理當前語言，未來可以支援動態切換
     final currentLocale = ref.watch(localeProvider);
-    
+
     return MaterialApp.router(
       title: 'FlirtScan',
       debugShowCheckedModeBanner: false,
@@ -52,5 +52,3 @@ class FlirtScanApp extends ConsumerWidget {
     );
   }
 }
-
- 

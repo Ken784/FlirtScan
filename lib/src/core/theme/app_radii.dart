@@ -14,15 +14,3 @@ class AppRadii {
   static const BorderRadius pill = BorderRadius.all(r30);
   static const BorderRadius image = BorderRadius.all(r28);
 }
-
-
-
-
-
-
-
-
-
-
-
-

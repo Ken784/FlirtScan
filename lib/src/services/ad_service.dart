@@ -10,10 +10,10 @@ class AdService {
   RewardedAd? _rewardedAd;
   bool _isAdLoaded = false;
   bool _isAdShowing = false;
-  
+
   final _adLoadedController = StreamController<bool>.broadcast();
   Stream<bool> get adLoadedStream => _adLoadedController.stream;
-  
+
   // 用於中斷廣告的回調
   VoidCallback? _onAdInterrupted;
 
@@ -46,7 +46,7 @@ class AdService {
           _rewardedAd = ad;
           _isAdLoaded = true;
           _adLoadedController.add(true);
-          
+
           // 設定 Full Screen Content Callback
           _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
             onAdShowedFullScreenContent: (ad) {
@@ -111,15 +111,15 @@ class AdService {
         _rewardedAd = null;
         _isAdLoaded = false;
         _onAdInterrupted = null;
-        
+
         // 先調用 dismiss callback
         onAdDismissed?.call();
-        
+
         // 如果已經獲得獎勵，調用獎勵 callback
         if (hasEarnedReward) {
           onUserEarnedReward();
         }
-        
+
         // 預載下一個廣告
         loadRewardedAd();
       },
@@ -141,7 +141,7 @@ class AdService {
       },
     );
   }
-  
+
   /// 中斷廣告播放（用於錯誤處理）
   void interruptAd() {
     if (_isAdShowing && _rewardedAd != null) {
@@ -149,7 +149,7 @@ class AdService {
       // 調用中斷回調
       _onAdInterrupted?.call();
       _onAdInterrupted = null;
-      
+
       // 關閉廣告（這會觸發 onAdDismissedFullScreenContent）
       // 注意：Google Mobile Ads SDK 沒有直接的 dismiss 方法
       // 我們只能通過回調來處理
@@ -172,4 +172,3 @@ class AdService {
     _adLoadedController.close();
   }
 }
-
