@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../core/models/analysis_result.dart';
 import '../core/providers/analysis_provider.dart';
+import '../core/providers/history_provider.dart';
+import '../services/storage_service.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../core/icons/app_icon_widgets.dart';
-import '../services/storage_service.dart';
 import '../widgets/navigation/page_header.dart';
 import '../widgets/navigation/bottom_nav.dart';
 import '../widgets/cards/list_entry_card.dart';
@@ -24,47 +25,29 @@ class HistoryPage extends ConsumerStatefulWidget {
 }
 
 class _HistoryPageState extends ConsumerState<HistoryPage> {
-  final StorageService _storageService = StorageService();
   int _navIndex = 1;
-  bool _isLoading = true;
-  List<AnalysisHistoryEntry> _history = [];
   bool _shouldReloadOnNextBuild = false;
 
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    // 歷史記錄由 historyProvider 管理，不需要手動載入
   }
 
-  Future<void> _loadHistory() async {
-    final results = await _storageService.getHistory();
-    if (!mounted) return;
-    setState(() {
-      _history = results;
-      _isLoading = false;
-    });
-  }
-
-  /// 根據 ID 刪除記錄（更可靠，不依賴索引）
+  /// 根據 ID 刪除記錄
   Future<void> _deleteById(String id) async {
-    // 先從 UI 中移除（樂觀更新），提供即時反饋
-    // 這樣即使儲存操作有延遲，用戶也能立即看到反饋
-    bool wasInList = false;
-    if (mounted) {
-      setState(() {
-        wasInList = _history.any((entry) => entry.result.id == id);
-        _history.removeWhere((entry) => entry.result.id == id);
-      });
-    }
-    
-    // 然後從儲存中刪除，確保資料已從持久化儲存中移除
-    // 這樣即使頁面重新構建，資料也不會再出現
     try {
-      await _storageService.deleteAnalysis(id);
+      await ref.read(historyProvider.notifier).deleteById(id);
     } catch (e) {
-      // 如果刪除失敗且記錄原本在列表中，重新載入以確保一致性
-      if (mounted && wasInList) {
-        _loadHistory();
+      // 刪除失敗時，Provider 會自動重新載入以確保一致性
+      // 這裡可以選擇顯示錯誤訊息
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('刪除失敗：$e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -115,13 +98,17 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 監聽歷史記錄狀態
+    final historyState = ref.watch(historyProvider);
+    final history = historyState.entries;
+    
     // 檢查是否需要重新載入數據（從 ResultPage 返回時）
     if (_shouldReloadOnNextBuild) {
       _shouldReloadOnNextBuild = false;
       // 在下一幀重新載入，避免在 build 期間修改狀態
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _loadHistory();
+          ref.read(historyProvider.notifier).reload();
         }
       });
     }
@@ -136,11 +123,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           ),
         ),
         child: SafeArea(
-          child: _isLoading
+          child: historyState.isLoading
               ? const Center(
                   child: CircularProgressIndicator(color: Colors.white),
                 )
-              : _history.isEmpty
+              : history.isEmpty
                   ? ListView(
                       padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
                       children: [
@@ -160,7 +147,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(AppSpacing.s20, 0, AppSpacing.s20, 120),
-                      itemCount: _history.length + 2,
+                      itemCount: history.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Padding(
@@ -173,17 +160,17 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                           );
                         }
 
-                        if (index == _history.length + 1) {
+                        if (index == history.length + 1) {
                           return const SizedBox(height: AppSpacing.s16);
                         }
 
                         final itemIndex = index - 1;
-                        final entry = _history[itemIndex];
+                        final entry = history[itemIndex];
                         final result = entry.result;
 
                         return Padding(
                           padding: EdgeInsets.only(
-                            bottom: itemIndex == _history.length - 1
+                            bottom: itemIndex == history.length - 1
                                 ? 0
                                 : AppSpacing.s12,
                           ),

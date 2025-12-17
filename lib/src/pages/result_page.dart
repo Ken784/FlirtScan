@@ -9,11 +9,11 @@ import 'package:go_router/go_router.dart';
 import '../core/icons/app_icon_widgets.dart';
 import '../core/models/analysis_result.dart';
 import '../core/providers/analysis_provider.dart';
+import '../core/providers/history_provider.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_text_styles.dart';
 import '../services/ad_service.dart';
-import '../services/storage_service.dart';
 import '../services/screenshot_service.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/cards/insight_card.dart';
@@ -44,7 +44,6 @@ class _ResultPageState extends ConsumerState<ResultPage>
   final ValueNotifier<bool> _isMovingRightNotifier = ValueNotifier<bool>(true);
   double _previousAnimationValue = 0.0;
   final AdService _adService = AdService();
-  final StorageService _storageService = StorageService();
   final ScreenshotService _screenshotService = ScreenshotService();
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   bool _isLoadingAd = false;
@@ -227,9 +226,9 @@ class _ResultPageState extends ConsumerState<ResultPage>
     final confirmed = await showConfirmDeleteDialog(context);
 
     if (confirmed == true && mounted) {
-      // 刪除分析結果
+      // 刪除分析結果（使用 historyProvider）
       try {
-        await _storageService.deleteAnalysis(result.id);
+        await ref.read(historyProvider.notifier).deleteById(result.id);
         
         // 返回上一頁
         if (mounted) {
