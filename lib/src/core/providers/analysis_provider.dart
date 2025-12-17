@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/analysis_result.dart';
-import '../../features/analysis/analysis_repository.dart';
 import '../../services/analysis_service.dart';
 import '../../services/storage_service.dart';
 
@@ -51,7 +50,7 @@ class AnalysisState {
 class AnalysisNotifier extends StateNotifier<AnalysisState> {
   AnalysisNotifier() : super(AnalysisState());
 
-  final AnalysisRepository _analysisRepository = AnalysisRepository();
+  final AnalysisService _analysisService = AnalysisService();
   final StorageService _storageService = StorageService();
 
   /// 開始分析
@@ -67,7 +66,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
     );
 
     try {
-      final result = await _analysisRepository.analyzeConversation(
+      final result = await _analysisService.analyzeConversation(
         imageBase64: imageBase64,
         language: 'zh-TW',
       );
