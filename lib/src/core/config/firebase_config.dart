@@ -28,8 +28,8 @@ class FirebaseConfig {
     // 在開發模式下使用本地 Emulator
     if (kDebugMode) {
       try {
-        FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.57', 5001);
-        debugPrint('Firebase Functions: 使用本地 Emulator (192.168.68.57:5001)');
+        FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.59', 5001);
+        debugPrint('Firebase Functions: 使用本地 Emulator (192.168.68.59:5001)');
       } catch (e) {
         debugPrint('Firebase Functions: 無法連接到本地 Emulator - $e');
         debugPrint('Firebase Functions: 將使用生產環境');
