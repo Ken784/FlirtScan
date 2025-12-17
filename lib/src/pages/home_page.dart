@@ -429,12 +429,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           style:
               AppTextStyles.body3Regular.copyWith(color: AppColors.textBlack80),
           textAlign: TextAlign.center,
-        )
-      else if (_preparedBase64String != null)
-        Text(
-          '圖片已準備完成，可以開始分析',
-          style: AppTextStyles.body3Regular.copyWith(color: AppColors.green),
-          textAlign: TextAlign.center,
         ),
       const SizedBox(height: AppSpacing.s16),
       // 開始分析按鈕
