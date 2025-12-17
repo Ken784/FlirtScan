@@ -80,61 +80,70 @@ class ConfirmDeleteDialog extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.s24),
 
-            // 確定按鈕（主要按鈕：紅色背景 + 白色文字）
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: AppRadii.pill,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s20,
-                    vertical: AppSpacing.s12,
+            // 按鈕容器（gap: 16px）
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 確定按鈕（主要按鈕：紫色背景 + 白色文字）
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: AppRadii.pill,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s24,
+                        vertical: AppSpacing.s12,
+                      ),
+                    ),
+                    child: Text(
+                      confirmText ?? '確定',
+                      style: AppTextStyles.body2Bold.copyWith(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  confirmText ?? '確定',
-                  style: AppTextStyles.body2Semi.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.s12),
+                const SizedBox(height: AppSpacing.s16),
 
-            // 取消按鈕（次要按鈕：白色背景 + 紅色文字 + 紅色邊框）
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.surface,
-                  side: const BorderSide(
-                    color: AppColors.primary,
-                    width: 1,
-                  ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: AppRadii.pill,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s20,
-                    vertical: AppSpacing.s12,
+                // 取消按鈕（次要按鈕：白色背景 + 紫色文字 + 紫色邊框）
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      side: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: AppRadii.pill,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s24,
+                        vertical: AppSpacing.s12,
+                      ),
+                    ),
+                    child: Text(
+                      cancelText ?? '取消',
+                      style: AppTextStyles.body2Bold.copyWith(
+                        fontSize: 14,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ),
-                child: Text(
-                  cancelText ?? '取消',
-                  style: AppTextStyles.body2Semi.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
+              ],
             ),
           ],
         ),

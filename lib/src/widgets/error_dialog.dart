@@ -48,7 +48,7 @@ class ErrorDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -57,48 +57,56 @@ class ErrorDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 標題區域
-            Text(
-              title,
-              style: AppTextStyles.body1Semi.copyWith(
-                fontSize: 18,
-                color: AppColors.textBlack,
-              ),
-              textAlign: TextAlign.left,
+            // 標題和訊息容器（gap: 16px）
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 標題區域
+                Text(
+                  title,
+                  style: AppTextStyles.body1Semi.copyWith(
+                    fontSize: 18,
+                    color: AppColors.textBlack,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 訊息區域（使用 grey/80 顏色）
+                Text(
+                  message,
+                  style: AppTextStyles.body3Regular.copyWith(
+                    color: AppColors.textBlack80,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
 
-            // 訊息區域
-            Text(
-              message,
-              style: AppTextStyles.body3Regular,
-              textAlign: TextAlign.left,
-            ),
-            const SizedBox(height: 40),
-
-            // 按鈕（次要按鈕樣式：白色背景 + 紅色邊框）
+            // 按鈕（主要按鈕樣式：紫色背景 + 白色文字）
             SizedBox(
               width: double.infinity,
               height: 52,
-              child: OutlinedButton(
+              child: ElevatedButton(
                 onPressed: onPressed ?? () => Navigator.of(context).pop(),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(
-                    color: AppColors.primary,
-                    width: 1,
-                  ),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
                 child: Text(
                   buttonText ?? '確定',
-                  style: AppTextStyles.body2Semi.copyWith(
-                    color: AppColors.primary,
+                  style: AppTextStyles.body2Bold.copyWith(
+                    fontSize: 14,
+                    color: Colors.white,
                   ),
                 ),
               ),
