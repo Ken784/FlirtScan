@@ -10,12 +10,12 @@ class AnalysisService {
   /// 分析對話截圖
   /// 
   /// [imageBase64] 壓縮後的對話截圖 Base64 字串
-  /// [language] App 當前語言（預設為 zh-TW）
+  /// [language] App 當前語言代碼（例如：'zh-TW'，預設為 'zh-TW' 作為後備）
   /// 
   /// 返回分析結果
   Future<AnalysisResult> analyzeConversation({
     required String imageBase64,
-    String language = 'zh-TW',
+    String language = 'zh-TW', // 預設值僅作為後備，通常應從 localeProvider 傳入
   }) async {
     try {
       debugPrint('AnalysisService: 開始分析對話...');

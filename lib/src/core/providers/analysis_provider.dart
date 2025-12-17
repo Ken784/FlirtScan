@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/analysis_result.dart';
 import '../../services/analysis_service.dart';
 import '../../services/storage_service.dart';
+import 'locale_provider.dart';
 
 /// 分析狀態
 enum AnalysisStatus {
@@ -48,8 +49,9 @@ class AnalysisState {
 
 /// 分析狀態 Notifier
 class AnalysisNotifier extends StateNotifier<AnalysisState> {
-  AnalysisNotifier() : super(AnalysisState());
+  AnalysisNotifier(this.ref) : super(AnalysisState());
 
+  final Ref ref;
   final AnalysisService _analysisService = AnalysisService();
   final StorageService _storageService = StorageService();
 
@@ -66,9 +68,12 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
     );
 
     try {
+      // 從 localeProvider 取得當前語言代碼
+      final language = ref.read(languageCodeProvider);
+      
       final result = await _analysisService.analyzeConversation(
         imageBase64: imageBase64,
-        language: 'zh-TW',
+        language: language,
       );
 
       state = state.copyWith(
@@ -133,6 +138,6 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
 
 /// 分析狀態 Provider
 final analysisProvider = StateNotifierProvider<AnalysisNotifier, AnalysisState>((ref) {
-  return AnalysisNotifier();
+  return AnalysisNotifier(ref);
 });
 

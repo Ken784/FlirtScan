@@ -6,6 +6,7 @@ import 'src/core/theme/app_theme.dart';
 import 'src/core/config/app_router.dart';
 import 'src/core/config/firebase_config.dart';
 import 'src/services/ad_service.dart';
+import 'src/core/providers/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,8 @@ class FlirtScanApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    // 使用 localeProvider 管理當前語言，未來可以支援動態切換
+    final currentLocale = ref.watch(localeProvider);
     
     return MaterialApp.router(
       title: 'FlirtScan',
@@ -44,10 +47,8 @@ class FlirtScanApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('zh', 'TW'),
-      ],
-      locale: const Locale('zh', 'TW'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: currentLocale,
     );
   }
 }
