@@ -63,3 +63,4 @@ flutter:
   # Assets
   assets:
     - assets/icons/
+    - assets/welcome_main_image.png
