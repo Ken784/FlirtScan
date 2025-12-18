@@ -26,7 +26,7 @@ class PageHeader extends StatelessWidget {
     final hasTrailing = trailing != null;
     // ignore: avoid_print
     debugPrint(
-        'DEBUG_PAGEHEADER: title="$title", hasLeading=$hasLeading, hasTrailing=$hasTrailing, centerTitle=$centerTitle, screenWidth=${mediaQuery.size.width}');
+        'DEBUG_PAGEHEADER: title=\'$title\', hasLeading=$hasLeading, hasTrailing=$hasTrailing, centerTitle=$centerTitle, screenWidth=${mediaQuery.size.width}');
     // #endregion
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),

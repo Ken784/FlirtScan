@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/analysis_result.dart';
+import '../../features/analysis/analysis_repository.dart';
 import '../../services/analysis_service.dart';
 import '../../services/storage_service.dart';
 import 'locale_provider.dart';
@@ -52,7 +53,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
   AnalysisNotifier(this.ref) : super(AnalysisState());
 
   final Ref ref;
-  final AnalysisService _analysisService = AnalysisService();
+  final AnalysisRepository _analysisRepository = AnalysisRepository();
   final StorageService _storageService = StorageService();
 
   /// 開始分析
@@ -71,7 +72,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
       // 從 localeProvider 取得當前語言代碼
       final language = ref.read(languageCodeProvider);
 
-      final result = await _analysisService.analyzeConversation(
+      final result = await _analysisRepository.analyzeConversation(
         imageBase64: imageBase64,
         language: language,
       );
