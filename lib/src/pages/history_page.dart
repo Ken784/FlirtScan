@@ -101,6 +101,32 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     final historyState = ref.watch(historyProvider);
     final history = historyState.entries;
 
+    // 監聽分析狀態，當分析完成時自動重新載入歷史記錄
+    final analysisState = ref.watch(analysisProvider);
+    ref.listen<AnalysisState>(analysisProvider, (previous, next) {
+      // 情況1：分析剛完成
+      if (previous?.isCompleted != true && next.isCompleted && next.result != null) {
+        // 分析完成，延遲一小段時間後重新載入，確保保存操作已完成
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            ref.read(historyProvider.notifier).reload();
+          }
+        });
+      }
+      // 情況2：進階分析被解鎖（result 的 isAdvancedUnlocked 從 false 變為 true）
+      if (previous?.result != null && next.result != null &&
+          previous!.result!.id == next.result!.id &&
+          !previous.result!.isAdvancedUnlocked &&
+          next.result!.isAdvancedUnlocked) {
+        // 進階分析解鎖，延遲一小段時間後重新載入，確保保存操作已完成
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            ref.read(historyProvider.notifier).reload();
+          }
+        });
+      }
+    });
+
     // 檢查是否需要重新載入數據（從 ResultPage 返回時）
     if (_shouldReloadOnNextBuild) {
       _shouldReloadOnNextBuild = false;
