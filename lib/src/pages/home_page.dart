@@ -36,6 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   bool _isProcessing = false;
   bool _isAnalyzing = false;
   final ImageService _imageService = ImageService();
+  bool _hasNavigatedToResult = false;
 
   Future<void> _pickImage() async {
     try {
@@ -108,6 +109,19 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
+  /// 重置到初始狀態（清除圖片和分析狀態）
+  void _resetToInitialState() {
+    setState(() {
+      _selectedImage = null;
+      _preparedBase64String = null;
+      _isProcessing = false;
+      _isAnalyzing = false;
+      _hasNavigatedToResult = false;
+    });
+    // 同時重置分析 provider 的狀態
+    ref.read(analysisProvider.notifier).reset();
+  }
+
   /// 開始分析對話
   Future<void> _startAnalysis() async {
     if (_preparedBase64String == null || _isAnalyzing) return;
@@ -162,15 +176,36 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     bool adInterrupted = false;
 
-    // 顯示全螢幕獎勵廣告
+      // 顯示全螢幕獎勵廣告
     await adService.showRewardedAd(
       onUserEarnedReward: () {
         // 用戶看完廣告，跳轉到 ResultPage
         debugPrint('廣告播放完成，跳轉到結果頁面');
         if (mounted && !adInterrupted) {
+          setState(() {
+            _hasNavigatedToResult = true;
+          });
           context.push(
             '${ResultPage.route}?imageBase64=${Uri.encodeComponent(_preparedBase64String!)}',
-          );
+          ).then((_) {
+            // 當從 ResultPage 返回時，檢查分析狀態
+            if (mounted && _hasNavigatedToResult) {
+              final analysisState = ref.read(analysisProvider);
+              // 只有在有分析結果的情況下才清除圖片（正常返回）
+              // 如果是錯誤狀態，保留圖片讓用戶可以重試
+              if (analysisState.isCompleted && analysisState.result != null) {
+                _resetToInitialState();
+              } else {
+                // 錯誤返回，重置分析狀態但保留圖片，讓用戶可以重試
+                setState(() {
+                  _hasNavigatedToResult = false;
+                  _isAnalyzing = false;
+                });
+                // 重置分析 provider 的狀態，但保留圖片
+                ref.read(analysisProvider.notifier).reset();
+              }
+            }
+          });
         }
       },
       onAdDismissed: () {
