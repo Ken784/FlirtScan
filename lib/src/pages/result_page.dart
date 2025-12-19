@@ -434,34 +434,34 @@ class _ResultPageState extends ConsumerState<ResultPage>
     // 準備維度分析列表
     final dimensionAnalyses = [
       DimensionAnalysis(
-        title: '情緒投入度',
-        score: result.emotional.score.round(),
+        title: '撩撥張力',
+        score: result.radar.tension.score.round(),
         maxScore: 10,
-        description: result.emotional.description,
+        description: result.radar.tension.description,
       ),
       DimensionAnalysis(
-        title: '語氣親密度',
-        score: result.intimacy.score.round(),
+        title: '自我揭露',
+        score: result.radar.disclosure.score.round(),
         maxScore: 10,
-        description: result.intimacy.description,
+        description: result.radar.disclosure.description,
       ),
       DimensionAnalysis(
-        title: '玩笑 / 調情程度',
-        score: result.playfulness.score.round(),
+        title: '生活滲透度',
+        score: result.radar.energy.score.round(),
         maxScore: 10,
-        description: result.playfulness.description,
+        description: result.radar.energy.description,
       ),
       DimensionAnalysis(
-        title: '回覆積極度',
-        score: result.responsive.score.round(),
+        title: '專屬特權',
+        score: result.radar.exclusivity.score.round(),
         maxScore: 10,
-        description: result.responsive.description,
+        description: result.radar.exclusivity.description,
       ),
       DimensionAnalysis(
-        title: '互動平衡度',
-        score: result.balance.score.round(),
+        title: '連結慾望',
+        score: result.radar.connection.score.round(),
         maxScore: 10,
-        description: result.balance.description,
+        description: result.radar.connection.description,
       ),
     ];
 

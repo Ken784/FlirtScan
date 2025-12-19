@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import '../core/models/analysis_result.dart';
@@ -6,6 +8,24 @@ import '../core/models/analysis_result.dart';
 /// 負責呼叫 Firebase Functions 進行對話分析
 class AnalysisService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
+  
+  // #region agent log
+  void _log(String location, String message, Map<String, dynamic> data, String hypothesisId) {
+    try {
+      final logEntry = {
+        'location': location,
+        'message': message,
+        'data': data,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'sessionId': 'debug-session',
+        'runId': 'run1',
+        'hypothesisId': hypothesisId,
+      };
+      final file = File('/Users/kenhuang/Desktop/FlirtScan/.cursor/debug.log');
+      file.writeAsStringSync('${jsonEncode(logEntry)}\n', mode: FileMode.append);
+    } catch (_) {}
+  }
+  // #endregion
 
   /// 分析對話截圖
   ///
@@ -19,14 +39,26 @@ class AnalysisService {
   }) async {
     try {
       debugPrint('AnalysisService: 開始分析對話...');
+      // #region agent log
+      _log('analysis_service.dart:21', '開始分析請求', {'imageBase64Length': imageBase64.length, 'language': language}, 'C');
+      // #endregion
 
       // 呼叫 Firebase Function
       final callable = _functions.httpsCallable('analyzeConversation');
+      // #region agent log
+      _log('analysis_service.dart:25', '創建 callable 後，準備發送請求', {'functionName': 'analyzeConversation'}, 'C');
+      // #endregion
 
+      // #region agent log
+      _log('analysis_service.dart:27', '發送請求前', {'hasImageBase64': imageBase64.isNotEmpty, 'imageBase64Length': imageBase64.length, 'language': language}, 'C');
+      // #endregion
       final result = await callable.call({
         'imageBase64': imageBase64,
         'language': language,
       });
+      // #region agent log
+      _log('analysis_service.dart:32', '收到回應', {'hasData': result.data != null}, 'C');
+      // #endregion
 
       debugPrint('AnalysisService: 收到回應');
 
@@ -65,6 +97,9 @@ class AnalysisService {
     } on FirebaseFunctionsException catch (e) {
       debugPrint(
           'AnalysisService: Firebase Functions 錯誤 - ${e.code}: ${e.message}');
+      // #region agent log
+      _log('analysis_service.dart:66', 'Firebase Functions 異常', {'code': e.code, 'message': e.message, 'details': e.details?.toString()}, 'A');
+      // #endregion
 
       // 處理特定錯誤
       if (e.code == 'invalid-argument' &&
@@ -79,6 +114,9 @@ class AnalysisService {
       );
     } catch (e) {
       debugPrint('AnalysisService: 未知錯誤 - $e');
+      // #region agent log
+      _log('analysis_service.dart:82', '未知錯誤', {'error': e.toString(), 'errorType': e.runtimeType.toString()}, 'D');
+      // #endregion
       throw AnalysisException(
         '分析過程中發生錯誤: ${e.toString()}',
         type: AnalysisExceptionType.unknown,

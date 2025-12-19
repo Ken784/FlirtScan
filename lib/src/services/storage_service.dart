@@ -42,7 +42,8 @@ class AnalysisHistoryEntry {
 /// 本地儲存服務
 /// 使用 shared_preferences 以 JSON 字串形式保存分析結果歷史紀錄
 class StorageService {
-  static const String _historyKey = 'analysis_history_v1';
+  // 更新版本以忽略舊格式資料（v1 使用舊的雷達圖欄位格式）
+  static const String _historyKey = 'analysis_history_v2';
 
   /// 儲存一次分析結果到歷史紀錄
   /// - 如果已有相同 id 的紀錄，會先移除舊的再插入新的

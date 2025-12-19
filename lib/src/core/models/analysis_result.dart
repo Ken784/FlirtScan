@@ -23,6 +23,49 @@ class RadarMetric {
   }
 }
 
+/// 雷達圖五維度
+class Radar {
+  final RadarMetric tension; // 撩撥張力
+  final RadarMetric disclosure; // 自我揭露
+  final RadarMetric energy; // 生活滲透度
+  final RadarMetric exclusivity; // 專屬特權
+  final RadarMetric connection; // 連結慾望
+
+  Radar({
+    required this.tension,
+    required this.disclosure,
+    required this.energy,
+    required this.exclusivity,
+    required this.connection,
+  });
+
+  factory Radar.fromJson(Map<String, dynamic> json) {
+    final radarJson = json['radar'] as Map<String, dynamic>? ?? json;
+    return Radar(
+      tension: RadarMetric.fromJson(
+          Map<String, dynamic>.from(radarJson['tension'] as Map)),
+      disclosure: RadarMetric.fromJson(
+          Map<String, dynamic>.from(radarJson['disclosure'] as Map)),
+      energy: RadarMetric.fromJson(
+          Map<String, dynamic>.from(radarJson['energy'] as Map)),
+      exclusivity: RadarMetric.fromJson(
+          Map<String, dynamic>.from(radarJson['exclusivity'] as Map)),
+      connection: RadarMetric.fromJson(
+          Map<String, dynamic>.from(radarJson['connection'] as Map)),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tension': tension.toJson(),
+      'disclosure': disclosure.toJson(),
+      'energy': energy.toJson(),
+      'exclusivity': exclusivity.toJson(),
+      'connection': connection.toJson(),
+    };
+  }
+}
+
 /// 發話者
 enum Speaker {
   me,
@@ -85,11 +128,7 @@ class AnalysisResult {
   final String partnerName; // 對方名稱
 
   // 雷達圖五維度
-  final RadarMetric emotional;
-  final RadarMetric intimacy;
-  final RadarMetric playfulness;
-  final RadarMetric responsive;
-  final RadarMetric balance;
+  final Radar radar;
 
   final double totalScore; // 總分
   final String relationshipStatus; // 關係狀態短語
@@ -108,11 +147,7 @@ class AnalysisResult {
     required this.id,
     required this.createdAt,
     required this.partnerName,
-    required this.emotional,
-    required this.intimacy,
-    required this.playfulness,
-    required this.responsive,
-    required this.balance,
+    required this.radar,
     required this.totalScore,
     required this.relationshipStatus,
     required this.summary,
@@ -133,17 +168,8 @@ class AnalysisResult {
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
       partnerName: json['partnerName'] as String? ?? '對方',
-      // 安全轉換嵌套的 Map
-      emotional: RadarMetric.fromJson(
-          Map<String, dynamic>.from(json['emotional'] as Map)),
-      intimacy: RadarMetric.fromJson(
-          Map<String, dynamic>.from(json['intimacy'] as Map)),
-      playfulness: RadarMetric.fromJson(
-          Map<String, dynamic>.from(json['playfulness'] as Map)),
-      responsive: RadarMetric.fromJson(
-          Map<String, dynamic>.from(json['responsive'] as Map)),
-      balance: RadarMetric.fromJson(
-          Map<String, dynamic>.from(json['balance'] as Map)),
+      // 安全轉換 radar 物件
+      radar: Radar.fromJson(json),
       totalScore: (json['totalScore'] as num).toDouble(),
       relationshipStatus: json['relationshipStatus'] as String,
       summary: json['summary'] as String,
@@ -165,11 +191,7 @@ class AnalysisResult {
       'id': id,
       'createdAt': createdAt.toIso8601String(),
       'partnerName': partnerName,
-      'emotional': emotional.toJson(),
-      'intimacy': intimacy.toJson(),
-      'playfulness': playfulness.toJson(),
-      'responsive': responsive.toJson(),
-      'balance': balance.toJson(),
+      'radar': radar.toJson(),
       'totalScore': totalScore,
       'relationshipStatus': relationshipStatus,
       'summary': summary,
@@ -186,11 +208,7 @@ class AnalysisResult {
     String? id,
     DateTime? createdAt,
     String? partnerName,
-    RadarMetric? emotional,
-    RadarMetric? intimacy,
-    RadarMetric? playfulness,
-    RadarMetric? responsive,
-    RadarMetric? balance,
+    Radar? radar,
     double? totalScore,
     String? relationshipStatus,
     String? summary,
@@ -204,11 +222,7 @@ class AnalysisResult {
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       partnerName: partnerName ?? this.partnerName,
-      emotional: emotional ?? this.emotional,
-      intimacy: intimacy ?? this.intimacy,
-      playfulness: playfulness ?? this.playfulness,
-      responsive: responsive ?? this.responsive,
-      balance: balance ?? this.balance,
+      radar: radar ?? this.radar,
       totalScore: totalScore ?? this.totalScore,
       relationshipStatus: relationshipStatus ?? this.relationshipStatus,
       summary: summary ?? this.summary,
