@@ -75,9 +75,9 @@ class ImageService {
       int targetWidth = originalWidth;
       int targetHeight = originalHeight;
 
-      if (originalWidth > 512) {
-        final double ratio = 512.0 / originalWidth;
-        targetWidth = 512;
+      if (originalWidth > 800) {
+        final double ratio = 800.0 / originalWidth;
+        targetWidth = 800;
         targetHeight = (originalHeight * ratio).round();
       }
 
@@ -91,7 +91,7 @@ class ImageService {
           await FlutterImageCompress.compressAndGetFile(
         imageFile.absolute.path,
         targetPath,
-        quality: 70, // 品質設為 70%
+        quality: 100, // 品質設為 100%
         minWidth: targetWidth,
         minHeight: targetHeight,
         format: CompressFormat.jpeg, // 轉為 JPEG

@@ -58,20 +58,22 @@ class RadarMetric {
   }
 }
 
-/// 雷達圖五維度
+/// 雷達圖六維度
 class Radar {
   final RadarMetric tension; // 撩撥張力
   final RadarMetric disclosure; // 自我揭露
-  final RadarMetric energy; // 生活滲透度
+  final RadarMetric momentum; // 關係動能
   final RadarMetric exclusivity; // 專屬特權
-  final RadarMetric connection; // 連結慾望
+  final RadarMetric baiting; // 誘敵導引
+  final RadarMetric defense; // 心理防禦
 
   Radar({
     required this.tension,
     required this.disclosure,
-    required this.energy,
+    required this.momentum,
     required this.exclusivity,
-    required this.connection,
+    required this.baiting,
+    required this.defense,
   });
 
   factory Radar.fromJson(Map<String, dynamic> json) {
@@ -83,12 +85,14 @@ class Radar {
           _safeMapConvert(radarJson['tension'])),
       disclosure: RadarMetric.fromJson(
           _safeMapConvert(radarJson['disclosure'])),
-      energy: RadarMetric.fromJson(
-          _safeMapConvert(radarJson['energy'])),
+      momentum: RadarMetric.fromJson(
+          _safeMapConvert(radarJson['momentum'])),
       exclusivity: RadarMetric.fromJson(
           _safeMapConvert(radarJson['exclusivity'])),
-      connection: RadarMetric.fromJson(
-          _safeMapConvert(radarJson['connection'])),
+      baiting: RadarMetric.fromJson(
+          _safeMapConvert(radarJson['baiting'])),
+      defense: RadarMetric.fromJson(
+          _safeMapConvert(radarJson['defense'])),
     );
   }
 
@@ -96,9 +100,10 @@ class Radar {
     return {
       'tension': tension.toJson(),
       'disclosure': disclosure.toJson(),
-      'energy': energy.toJson(),
+      'momentum': momentum.toJson(),
       'exclusivity': exclusivity.toJson(),
-      'connection': connection.toJson(),
+      'baiting': baiting.toJson(),
+      'defense': defense.toJson(),
     };
   }
 }
@@ -164,7 +169,7 @@ class AnalysisResult {
   final DateTime createdAt; // 建立時間
   final String partnerName; // 對方名稱
 
-  // 雷達圖五維度
+  // 雷達圖六維度
   final Radar radar;
 
   final double totalScore; // 總分

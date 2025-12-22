@@ -446,10 +446,10 @@ class _ResultPageState extends ConsumerState<ResultPage>
         description: result.radar.disclosure.description,
       ),
       DimensionAnalysis(
-        title: '生活滲透度',
-        score: result.radar.energy.score.round(),
+        title: '關係動能',
+        score: result.radar.momentum.score.round(),
         maxScore: 10,
-        description: result.radar.energy.description,
+        description: result.radar.momentum.description,
       ),
       DimensionAnalysis(
         title: '專屬特權',
@@ -458,10 +458,16 @@ class _ResultPageState extends ConsumerState<ResultPage>
         description: result.radar.exclusivity.description,
       ),
       DimensionAnalysis(
-        title: '連結慾望',
-        score: result.radar.connection.score.round(),
+        title: '誘敵導引',
+        score: result.radar.baiting.score.round(),
         maxScore: 10,
-        description: result.radar.connection.description,
+        description: result.radar.baiting.description,
+      ),
+      DimensionAnalysis(
+        title: '心理防禦',
+        score: result.radar.defense.score.round(),
+        maxScore: 10,
+        description: result.radar.defense.description,
       ),
     ];
 
@@ -515,7 +521,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
                   scoreMinor: 10,
                 ),
                 const SizedBox(height: AppSpacing.s24),
-                // 評分分析卡片（查看對話截圖 + 五個維度說明）
+                // 評分分析卡片（查看對話截圖 + 六個維度說明）
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.surface,
@@ -573,7 +579,7 @@ class _ResultPageState extends ConsumerState<ResultPage>
                         color: AppColors.primary,
                       ),
                       const SizedBox(height: AppSpacing.s16),
-                      // 五個維度詳細分析
+                      // 六個維度詳細分析
                       ...dimensionAnalyses.map(
                         (analysis) => Padding(
                           padding:

@@ -62,21 +62,14 @@ export const analyzeConversation = functions.https.onCall(
 \`\`\`
 不要進行後續分析。
 
-## 任務 0 關係定性與分數天花板 (The Filter)
+## 任務 0 關係定性與非線性評分 (Scoring Engine)
 
-在評分前，請先識別對話性質並遵守以下「分數梯度」：
--【商務/事務型】：
-特徵：聚焦任務、極度禮貌、無私交。
-處置：總分 (TotalScore) 強制低於 1.5 分。
--【純親情/日常型】：
-特徵：僅限生活交待（如：領包裹、幾點回家），無情感波瀾。
-處置：總分強制低於 3.0 分。
--【親近異性好友 / 曖昧前期】：
-特徵：非家人但有高頻的生活瑣事分享（報備行程、關心天氣、分享食物）。這代表強烈的情感依賴與「生活滲透」。
-處置：即使無明確撩撥，總分應落在 4.0 - 6.5 分 之間，定義為「友誼以上」或「友達以上」。
--【浪漫曖昧型】：
-特徵：存在明顯張力、撩撥、試探、越界稱呼、深夜感性對話。
-處置：總分應在 7.0 分以上。
+在評分前，請先識別對話性質並遵守以下邏輯：
+1. **拒絕平均值**：總分 (totalScore) 不應只是維度的算術平均。若對話觸發「唯一性宣告」、「高階智力博弈」或「共謀感」，總分應由高分維度主導（通常從 7.5 起跳）。
+2. **分數天花板 (Ceilings)**：
+   - 【商務/事務型】：聚焦任務、無私交。總分強制低於 1.5。
+   - 【純親情/日常型】：僅限生活交代、無情緒波瀾。總分強制低於 3.0。
+3. **識別「逃生門」**：觀察發話者是否在釋放高張力訊號後，立刻用專業、玩笑或第三方話題掩蓋，這通常是高階曖昧的防禦表現。
 
 ## 任務 1 角色與動機識別 (Identify Characters & Motives)
 
@@ -86,29 +79,31 @@ export const analyzeConversation = functions.https.onCall(
 - 如果無法明確區分，標記為 unknown
 - 關鍵點：若無法確定身份，請推測「生活瑣事」的頻率。對於非家人而言，頻繁的瑣事關心就是一種「佔有時間」的行為。
 
-## 任務 2 曖昧雷達五維度 (Radar Analysis)
-針對 5 個維度進行評分（每個維度 0-10 分），並提供具體理由：
+## 任務 2 曖昧雷達六維度 (Radar Analysis)
+針對 6 個維度進行評分（每個維度 0-10 分），並提供具體理由：
 
-1. **撩撥張力 (Tension)**: 評估是否存在「火花」？調情、故意挑釁、反向操作。
+1. **撩撥張力 (Tension)**: 評估是否存在「火花」？調情、故意挑釁、反向操作。是否利用雙關、學術梗或角色扮演來進行心理拉扯。
 2. **自我揭露 (Disclosure)**: 評估是否願意展示私密情緒、分享非必要的瑣碎生活或個人弱點？
-3. **生活滲透度 (Energy)**: 評估互動頻率、回覆速度。是否願意花時間在「沒營養的對話」上？（這是判斷異性友人的關鍵）。
-4. **專屬特權 (Exclusivity)**: 評估是否有專屬梗、私房話、或不同於對一般人的語氣。
-5. **連結慾望 (Connection)**: 評估是否有見面暗示、未來共同規劃、或試探對方的感情狀態。
+3. **關係動能 (Momentum)**：評估關係是否有向前推進的意圖（如：見面暗示、未來規劃、感情狀態試探）。
+4. **專屬特權 (Exclusivity)**: 評估是否有專屬梗、私房話、或不同於對一般人的語氣。評估是否建立了一種「只有我們懂」的氛圍，將其他人隔絕在外。
+5. **誘敵導引 (Baiting)**：俗稱「做球」。是否主動製造被撩的機會、拋出容易接續的話題或顯示需求感。
+6. *心理防禦 (Defense)**：識別「保護色」。是否在釋放張力後利用專業身分或玩笑掩飾真心。
 
 每個維度回傳格式：\`{score: 0-10, description: "具體評語"}\`
 
 ## 任務 3：深度分析 (Deep Insight)
 
 1. **relationshipStatus**: 4-6 字定義，需包含狀態比喻（如：「溫水煮青蛙」、「只差一個契機」、「文藝式互撩」、「純種工具人」），如果分數不高，就很清楚的表達，不需要太nice。
-2. **summary**: 200-400 字。解構「心理博弈」。分析誰在主導，並點破這種「生活關心」到底是溫馨友誼還是蓄謀已久的曖昧。
+2. **summary**: 200-400 字。解構「心理博弈」。點破那層「專業掩護」下的真實情感。
 3. **toneInsight**: 氛圍洞察（如：生活感極強的親暱、充滿試探的拉扯）。
 4. **wittyConclusion**: 犀利且一針見血的金句（Mic-drop style）。
-5. **totalScore**: 總分，0-10分，總分是所有維度分數的加總後除以 5 的平均值，小數點以下取整數。
+5. **totalScore**: 總分，0-10分(整數)，總分。根據分數梯度評分，對話中出現【唯一性宣告】、【智力博弈】或【共謀感】，總分應直接從 7.5 分起跳，不論其他維度（如生活滲透度）是否偏低。
 
 ## 任務 4 逐句心理拆解 (Sentence Analysis & Wrap-up)
+逐句心理拆解，回傳的順序必續按照當初對話的順序先後。
 
-1. 選出 3-5 句關鍵對話，每句提供：
-   - \`originalText\`: 原始對話內容。如果是連續的對話，情境相關可以合併成一句話。
+1. 選出 3-8 句關鍵對話，每句提供：
+   - \`originalText\`: 原始對話內容。如果是連續的對話，情境相關可以合併成一句話。（如：如果把"我""愛""你"分成三個對話送出，分析時應該合併成一句話"我愛你"。）
    - \`speaker\`: 發話者（"me" 或 "partner"）
    - \`hiddenMeaning\`: 背後含意（潛台詞），分析戰術（如：生活滲透、直球進攻、假性拒絕、情感索求）。(約30-100字, 越是轉折的關鍵句，分析字數越多)
    - \`flirtScore\`: 1-10 星評分
@@ -126,9 +121,10 @@ export const analyzeConversation = functions.https.onCall(
   "radar": {
       "tension": {"score": 0.0, "description": "評語"},
       "disclosure": {"score": 0.0, "description": "評語"},
-      "energy": {"score": 0.0, "description": "評語"},
+      "momentum": {"score": 0.0, "description": "評語"},  
       "exclusivity": {"score": 0.0, "description": "評語"},
-      "connection": {"score": 0.0, "description": "評語"}
+      "baiting": {"score": 0.0, "description": "評語"},
+      "defense": {"score": 0.0, "description": "評語"}
     },
   "totalScore": 0-10,
   "relationshipStatus": "4-6字狀態短語",
@@ -300,7 +296,7 @@ export const analyzeConversation = functions.https.onCall(
       if (!analysisResult.radar || typeof analysisResult.radar !== "object") {
         analysisResult.radar = {};
       }
-      const metrics = ["tension", "disclosure", "energy", "exclusivity", "connection"];
+      const metrics = ["tension", "disclosure", "momentum", "exclusivity", "baiting", "defense"];
       for (const metric of metrics) {
         if (!analysisResult.radar[metric] || typeof analysisResult.radar[metric] !== "object") {
           analysisResult.radar[metric] = { score: 0, description: "無法分析" };
