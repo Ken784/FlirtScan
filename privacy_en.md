@@ -148,4 +148,4 @@ We will respond to your inquiries within a reasonable time.
 
 **FlirtScan Development Team**
 
-*This Privacy Policy was last updated in December 2024*
+*This Privacy Policy was last updated in December 2025*
