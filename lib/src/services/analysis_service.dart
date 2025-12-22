@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import '../core/models/analysis_result.dart';
@@ -9,23 +7,40 @@ import '../core/models/analysis_result.dart';
 class AnalysisService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
   
-  // #region agent log
-  void _log(String location, String message, Map<String, dynamic> data, String hypothesisId) {
-    try {
-      final logEntry = {
-        'location': location,
-        'message': message,
-        'data': data,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'sessionId': 'debug-session',
-        'runId': 'run1',
-        'hypothesisId': hypothesisId,
-      };
-      final file = File('/Users/kenhuang/Desktop/FlirtScan/.cursor/debug.log');
-      file.writeAsStringSync('${jsonEncode(logEntry)}\n', mode: FileMode.append);
-    } catch (_) {}
+  /// 安全地將任何 Map 類型轉換為 Map<String, dynamic>
+  /// 處理 _Map<Object?, Object?> 等類型
+  static Map<String, dynamic> _safeMapConvert(dynamic value) {
+    if (value == null) {
+      return {};
+    }
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      // 遞歸轉換所有鍵值對
+      return Map<String, dynamic>.fromEntries(
+        value.entries.map((e) => MapEntry(
+          e.key?.toString() ?? '',
+          _safeConvertValue(e.value),
+        )),
+      );
+    }
+    return {};
   }
-  // #endregion
+
+  /// 安全地轉換值（處理嵌套的 Map 和 List）
+  static dynamic _safeConvertValue(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is Map) {
+      return _safeMapConvert(value);
+    }
+    if (value is List) {
+      return value.map((e) => _safeConvertValue(e)).toList();
+    }
+    return value;
+  }
 
   /// 分析對話截圖
   ///
@@ -39,26 +54,13 @@ class AnalysisService {
   }) async {
     try {
       debugPrint('AnalysisService: 開始分析對話...');
-      // #region agent log
-      _log('analysis_service.dart:21', '開始分析請求', {'imageBase64Length': imageBase64.length, 'language': language}, 'C');
-      // #endregion
 
       // 呼叫 Firebase Function
       final callable = _functions.httpsCallable('analyzeConversation');
-      // #region agent log
-      _log('analysis_service.dart:25', '創建 callable 後，準備發送請求', {'functionName': 'analyzeConversation'}, 'C');
-      // #endregion
-
-      // #region agent log
-      _log('analysis_service.dart:27', '發送請求前', {'hasImageBase64': imageBase64.isNotEmpty, 'imageBase64Length': imageBase64.length, 'language': language}, 'C');
-      // #endregion
       final result = await callable.call({
         'imageBase64': imageBase64,
         'language': language,
       });
-      // #region agent log
-      _log('analysis_service.dart:32', '收到回應', {'hasData': result.data != null}, 'C');
-      // #endregion
 
       debugPrint('AnalysisService: 收到回應');
 
@@ -68,13 +70,12 @@ class AnalysisService {
       }
 
       // 安全地轉換類型：從 Map<Object?, Object?> 轉為 Map<String, dynamic>
-      final responseData = Map<String, dynamic>.from(result.data as Map);
+      final responseData = _safeMapConvert(result.data);
 
       // 檢查是否成功
       if (responseData['success'] == true && responseData['data'] != null) {
         // 同樣需要安全轉換嵌套的 Map
-        final analysisData =
-            Map<String, dynamic>.from(responseData['data'] as Map);
+        final analysisData = _safeMapConvert(responseData['data']);
 
         // 確保有 ID：如果 Firebase 沒有返回 ID，生成一個
         if (analysisData['id'] == null) {
@@ -97,9 +98,6 @@ class AnalysisService {
     } on FirebaseFunctionsException catch (e) {
       debugPrint(
           'AnalysisService: Firebase Functions 錯誤 - ${e.code}: ${e.message}');
-      // #region agent log
-      _log('analysis_service.dart:66', 'Firebase Functions 異常', {'code': e.code, 'message': e.message, 'details': e.details?.toString()}, 'A');
-      // #endregion
 
       // 處理特定錯誤
       if (e.code == 'invalid-argument' &&
@@ -114,9 +112,6 @@ class AnalysisService {
       );
     } catch (e) {
       debugPrint('AnalysisService: 未知錯誤 - $e');
-      // #region agent log
-      _log('analysis_service.dart:82', '未知錯誤', {'error': e.toString(), 'errorType': e.runtimeType.toString()}, 'D');
-      // #endregion
       throw AnalysisException(
         '分析過程中發生錯誤: ${e.toString()}',
         type: AnalysisExceptionType.unknown,

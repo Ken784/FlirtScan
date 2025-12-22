@@ -20,9 +20,18 @@ const openai = new OpenAI({
   apiKey: openaiApiKey,
 });
 
+// 定義請求數據的類型
+interface AnalyzeConversationRequest {
+  imageBase64: string;
+  language?: string;
+}
+
 // 分析對話截圖的 HTTPS Callable Function
 export const analyzeConversation = functions.https.onCall(
-  async (data, context) => {
+  async (request, context) => {
+    // 從 request 中提取數據（Firebase Functions 的類型定義）
+    const data = request.data as AnalyzeConversationRequest;
+    
     functions.logger.info("analyzeConversation 函數被調用", {
       hasImageBase64: !!data.imageBase64,
       imageBase64Length: data.imageBase64?.length || 0,

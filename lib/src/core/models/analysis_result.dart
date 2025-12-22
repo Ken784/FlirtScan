@@ -1,3 +1,38 @@
+/// 安全地將任何 Map 類型轉換為 Map<String, dynamic>
+/// 處理 _Map<Object?, Object?> 等類型
+Map<String, dynamic> _safeMapConvert(dynamic value) {
+  if (value == null) {
+    return {};
+  }
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  if (value is Map) {
+    // 遞歸轉換所有鍵值對
+    return Map<String, dynamic>.fromEntries(
+      value.entries.map((e) => MapEntry(
+        e.key?.toString() ?? '',
+        _safeConvertValue(e.value),
+      )),
+    );
+  }
+  return {};
+}
+
+/// 安全地轉換值（處理嵌套的 Map 和 List）
+dynamic _safeConvertValue(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is Map) {
+    return _safeMapConvert(value);
+  }
+  if (value is List) {
+    return value.map((e) => _safeConvertValue(e)).toList();
+  }
+  return value;
+}
+
 /// 雷達圖維度
 class RadarMetric {
   final double score; // 0-10 分
@@ -40,18 +75,20 @@ class Radar {
   });
 
   factory Radar.fromJson(Map<String, dynamic> json) {
-    final radarJson = json['radar'] as Map<String, dynamic>? ?? json;
+    final radarJsonRaw = json['radar'] ?? json;
+    final radarJson = _safeMapConvert(radarJsonRaw);
+
     return Radar(
       tension: RadarMetric.fromJson(
-          Map<String, dynamic>.from(radarJson['tension'] as Map)),
+          _safeMapConvert(radarJson['tension'])),
       disclosure: RadarMetric.fromJson(
-          Map<String, dynamic>.from(radarJson['disclosure'] as Map)),
+          _safeMapConvert(radarJson['disclosure'])),
       energy: RadarMetric.fromJson(
-          Map<String, dynamic>.from(radarJson['energy'] as Map)),
+          _safeMapConvert(radarJson['energy'])),
       exclusivity: RadarMetric.fromJson(
-          Map<String, dynamic>.from(radarJson['exclusivity'] as Map)),
+          _safeMapConvert(radarJson['exclusivity'])),
       connection: RadarMetric.fromJson(
-          Map<String, dynamic>.from(radarJson['connection'] as Map)),
+          _safeMapConvert(radarJson['connection'])),
     );
   }
 
@@ -177,8 +214,7 @@ class AnalysisResult {
       wittyConclusion: json['wittyConclusion'] as String? ?? '',
       // 安全轉換 List 中的 Map
       sentences: (json['sentences'] as List<dynamic>?)
-              ?.map((e) => SentenceAnalysis.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
+              ?.map((e) => SentenceAnalysis.fromJson(_safeMapConvert(e)))
               .toList() ??
           [],
       advancedSummary: json['advancedSummary'] as String,
