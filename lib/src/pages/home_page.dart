@@ -162,8 +162,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _showAd() async {
     final adService = AdService();
 
-    // 檢查廣告是否已載入
-    if (!adService.isAdLoaded) {
+    // 檢查廣告是否已載入（使用一般分析廣告）
+    if (!adService.isAdLoaded(AdType.startAnalysis)) {
       // 廣告未載入，顯示錯誤
       if (mounted) {
         ref.read(errorProvider.notifier).showError(
@@ -176,8 +176,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     bool adInterrupted = false;
 
-      // 顯示全螢幕獎勵廣告
+      // 顯示全螢幕獎勵廣告（一般分析廣告）
     await adService.showRewardedAd(
+      adType: AdType.startAnalysis,
       onUserEarnedReward: () {
         // 用戶看完廣告，跳轉到 ResultPage
         debugPrint('廣告播放完成，跳轉到結果頁面');
@@ -261,10 +262,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (next.hasError && mounted && !errorState.hasError) {
         debugPrint('HomePage: 偵測到分析錯誤，中斷廣告播放');
 
-        // 中斷廣告播放
+        // 中斷廣告播放（一般分析廣告）
         final adService = AdService();
-        if (adService.isAdShowing) {
-          adService.interruptAd();
+        if (adService.isAdShowing(AdType.startAnalysis)) {
+          adService.interruptAd(AdType.startAnalysis);
         }
 
         // 顯示錯誤

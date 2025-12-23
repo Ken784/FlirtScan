@@ -100,8 +100,8 @@ class _ResultPageState extends ConsumerState<ResultPage>
       _isLoadingAd = true;
     });
 
-    // 檢查廣告是否已載入
-    if (!_adService.isAdLoaded) {
+    // 檢查廣告是否已載入（使用進階分析廣告）
+    if (!_adService.isAdLoaded(AdType.advancedAnalysis)) {
       // 顯示載入提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,11 +112,11 @@ class _ResultPageState extends ConsumerState<ResultPage>
         );
       }
 
-      // 等待廣告載入
-      await _adService.loadRewardedAd();
+      // 等待廣告載入（進階分析廣告）
+      await _adService.loadRewardedAd(AdType.advancedAnalysis);
 
       // 再次檢查廣告是否載入成功
-      if (!_adService.isAdLoaded) {
+      if (!_adService.isAdLoaded(AdType.advancedAnalysis)) {
         if (mounted) {
           setState(() {
             _isLoadingAd = false;
@@ -132,8 +132,9 @@ class _ResultPageState extends ConsumerState<ResultPage>
       }
     }
 
-    // 播放廣告
+    // 播放廣告（進階分析廣告）
     await _adService.showRewardedAd(
+      adType: AdType.advancedAnalysis,
       onUserEarnedReward: () {
         // 用戶看完廣告，解鎖進階分析
         debugPrint('ResultPage: 用戶看完廣告，解鎖進階分析');

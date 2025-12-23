@@ -17,8 +17,10 @@ void main() async {
   // 初始化 Google Mobile Ads
   await AdService.initialize();
 
-  // 預載廣告
-  AdService().loadRewardedAd();
+  // 預載兩個廣告（一般分析和進階分析）
+  final adService = AdService();
+  adService.loadRewardedAd(AdType.startAnalysis);
+  adService.loadRewardedAd(AdType.advancedAnalysis);
 
   runApp(
     const ProviderScope(
