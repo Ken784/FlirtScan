@@ -59,9 +59,9 @@ class AdService {
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       switch (adType) {
         case AdType.startAnalysis:
-          return 'ca-app-pub-5593605813396679/5835888758'; // iOS 真實 ID
+          return 'ca-app-pub-3940256099942544/1712485313'; // iOS 測試 ID
         case AdType.advancedAnalysis:
-          return 'ca-app-pub-5593605813396679/6367846577'; // iOS 真實 ID
+          return 'ca-app-pub-3940256099942544/1712485313'; // iOS 測試 ID
       }
     }
     return '';
