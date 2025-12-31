@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>為了支撐曖昧解碼器的電費並持續提供免費服務，請點擊允許來支持我們。</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -52,8 +50,9 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>需要存取相冊以選取對話截圖進行分析</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-5593605813396679~2227638624</string><key>NSUserTrackingUsageDescription</key>
-    <string>為了不讓您在脫單路上孤軍奮戰，我們需要廣告夥伴的銀彈支援</string>
+	<string>ca-app-pub-5593605813396679~2227638624</string>
+	<key>NSUserTrackingUsageDescription</key>
+    <string>提供我會有興趣的廣告</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 	<dict>

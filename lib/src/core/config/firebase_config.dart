@@ -49,12 +49,12 @@ class FirebaseConfig {
     if (kDebugMode) {
       try {
         // #region agent log
-        _log('firebase_config.dart:31', '配置 Emulator 前', {'host': '192.168.68.57', 'port': 5001, 'kDebugMode': kDebugMode}, 'B');
+        _log('firebase_config.dart:31', '配置 Emulator 前', {'host': '192.168.68.54', 'port': 5001, 'kDebugMode': kDebugMode}, 'B');
         // #endregion
-        FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.57', 5001);
-        debugPrint('Firebase Functions: 使用本地 Emulator (192.168.68.57:5001)');
+        FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.54', 5001);
+        debugPrint('Firebase Functions: 使用本地 Emulator (192.168.68.54:5001)');
         // #region agent log
-        _log('firebase_config.dart:34', 'Emulator 配置成功', {'host': '192.168.68.57', 'port': 5001}, 'B');
+        _log('firebase_config.dart:34', 'Emulator 配置成功', {'host': '192.168.68.54', 'port': 5001}, 'B');
         // #endregion
       } catch (e) {
         debugPrint('Firebase Functions: 無法連接到本地 Emulator - $e');

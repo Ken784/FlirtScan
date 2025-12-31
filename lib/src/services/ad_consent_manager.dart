@@ -59,6 +59,10 @@ class AdConsentManager {
   /// 只有在用戶同意後，此屬性才會變為 true
   bool canRequestAds = false;
 
+  /// 儲存的調試設定（用於 requestConsentInfoUpdate）
+  DebugGeography? _storedDebugGeography;
+  List<String>? _storedTestDeviceIds;
+
   /// 初始化授權管理器
   /// 
   /// 此方法應該在應用啟動時調用，用於初始化 UMP SDK
@@ -67,13 +71,13 @@ class AdConsentManager {
   /// 參數：
   /// - [debugGeography]: 調試地理位置設定（僅在調試模式下有效）
   ///   可選值：
-  ///   - [ConsentDebugGeography.debugGeographyEEA]: 模擬歐盟/歐洲經濟區
-  ///   - [ConsentDebugGeography.debugGeographyNotEEA]: 模擬非歐盟地區
-  ///   - [ConsentDebugGeography.debugGeographyDisabled]: 禁用調試模式（預設）
+  ///   - [DebugGeography.debugGeographyEea]: 模擬歐盟/歐洲經濟區
+  ///   - [DebugGeography.debugGeographyOther]: 模擬非歐盟地區
+  ///   - [DebugGeography.debugGeographyDisabled]: 禁用調試模式（預設）
   /// - [testDeviceIds]: 測試設備 ID 列表（僅在調試模式下有效）
   ///   可以從日誌中獲取設備的廣告 ID，用於指定測試設備
   void initialize({
-    ConsentDebugGeography? debugGeography,
+    DebugGeography? debugGeography,
     List<String>? testDeviceIds,
   }) {
     if (_isInitialized) {
@@ -81,18 +85,20 @@ class AdConsentManager {
       return;
     }
     
-    _consentInformation = UserMessagingPlatform.instance.consentInformation;
+    _consentInformation = ConsentInformation.instance;
     _isInitialized = true;
     
-    // 如果提供了調試設定，則應用調試模式
+    // 如果提供了調試設定，則儲存設定（將在 requestConsentInfoUpdate 時使用）
     if (debugGeography != null) {
+      _storedDebugGeography = debugGeography;
+      _storedTestDeviceIds = testDeviceIds;
       setDebugGeography(debugGeography, testDeviceIds: testDeviceIds);
     }
     
-    // 檢查現有的授權狀態
+    // 檢查現有的授權狀態（異步執行，但不等待，因為 initialize 是同步方法）
     _updateCanRequestAds();
     
-    debugPrint('AdConsentManager: 初始化完成，當前 canRequestAds = $canRequestAds');
+    debugPrint('AdConsentManager: 初始化完成');
   }
 
   /// 設置調試地理位置（用於開發和測試）
@@ -102,32 +108,33 @@ class AdConsentManager {
   /// 
   /// 參數：
   /// - [geography]: 調試地理位置設定
-  ///   - [ConsentDebugGeography.debugGeographyEEA]: 模擬歐盟/歐洲經濟區（會顯示 GDPR 授權表單）
-  ///   - [ConsentDebugGeography.debugGeographyNotEEA]: 模擬非歐盟地區（通常不顯示授權表單）
-  ///   - [ConsentDebugGeography.debugGeographyDisabled]: 禁用調試模式，使用實際地理位置
+  ///   - [DebugGeography.debugGeographyEea]: 模擬歐盟/歐洲經濟區（會顯示 GDPR 授權表單）
+  ///   - [DebugGeography.debugGeographyOther]: 模擬非歐盟地區（通常不顯示授權表單）
+  ///   - [DebugGeography.debugGeographyDisabled]: 禁用調試模式，使用實際地理位置
   /// - [testDeviceIds]: 測試設備 ID 列表（可選）
   ///   可以從日誌中獲取設備的廣告 ID，用於指定哪些設備使用調試模式
   /// 
   /// 注意：
   /// - 此方法僅在調試模式下有效，在生產環境中會被忽略
   /// - 建議在開發環境中使用，方便測試授權流程
+  /// - 調試設定需要在 [requestConsentInfoUpdate] 時通過參數傳遞
   /// 
   /// 範例：
   /// ```dart
   /// // 模擬歐盟環境，強制顯示授權表單
-  /// consentManager.setDebugGeography(ConsentDebugGeography.debugGeographyEEA);
+  /// consentManager.setDebugGeography(DebugGeography.debugGeographyEea);
   /// 
   /// // 模擬非歐盟環境，不顯示授權表單
-  /// consentManager.setDebugGeography(ConsentDebugGeography.debugGeographyNotEEA);
+  /// consentManager.setDebugGeography(DebugGeography.debugGeographyOther);
   /// 
   /// // 為特定測試設備啟用調試模式
   /// consentManager.setDebugGeography(
-  ///   ConsentDebugGeography.debugGeographyEEA,
+  ///   DebugGeography.debugGeographyEea,
   ///   testDeviceIds: ['TEST_DEVICE_ID_1', 'TEST_DEVICE_ID_2'],
   /// );
   /// ```
   void setDebugGeography(
-    ConsentDebugGeography geography, {
+    DebugGeography geography, {
     List<String>? testDeviceIds,
   }) {
     if (!_isInitialized) {
@@ -135,15 +142,8 @@ class AdConsentManager {
       return;
     }
 
-    // 建立調試設定
-    final debugSettings = ConsentDebugSettings(
-      debugGeography: geography,
-      testDeviceIds: testDeviceIds ?? [],
-    );
-
-    // 應用調試設定
-    _consentInformation.debugSettings = debugSettings;
-
+    // 注意：在 7.0.0 版本中，debugSettings 需要通過 ConsentRequestParameters 傳遞
+    // 這裡只是儲存設定，實際使用時會在 requestConsentInfoUpdate 中應用
     debugPrint('AdConsentManager: 已設置調試地理位置: $geography');
     if (testDeviceIds != null && testDeviceIds.isNotEmpty) {
       debugPrint('AdConsentManager: 測試設備 ID: ${testDeviceIds.join(", ")}');
@@ -201,13 +201,23 @@ class AdConsentManager {
     final completer = Completer<void>();
 
     try {
+      // 建立調試設定（如果有儲存的話）
+      ConsentDebugSettings? debugSettings;
+      if (_storedDebugGeography != null) {
+        debugSettings = ConsentDebugSettings(
+          debugGeography: _storedDebugGeography,
+          testIdentifiers: _storedTestDeviceIds,
+        );
+      }
+
       // 建立授權請求參數
       final params = ConsentRequestParameters(
         tagForUnderAgeOfConsent: tagForUnderAgeOfConsent,
+        consentDebugSettings: debugSettings,
       );
 
-      // 請求授權資訊更新
-      await _consentInformation.requestConsentInfoUpdate(
+      // 請求授權資訊更新（注意：此方法返回 void，使用回調）
+      _consentInformation.requestConsentInfoUpdate(
         params,
         // 成功回調：授權資訊已更新
         () async {
@@ -215,14 +225,15 @@ class AdConsentManager {
           
           try {
             // 檢查是否需要顯示授權表單
-            if (_consentInformation.isConsentFormAvailable) {
+            final isFormAvailable = await _consentInformation.isConsentFormAvailable();
+            if (isFormAvailable) {
               debugPrint('AdConsentManager: 需要顯示授權表單');
               // 載入並顯示授權表單（此方法內部也使用 Completer，會等待表單關閉）
               await loadAndShowConsentFormIfRequired();
             } else {
               debugPrint('AdConsentManager: 不需要顯示授權表單');
               // 直接更新狀態
-              _updateCanRequestAds();
+              await _updateCanRequestAds();
             }
             
             // 整個流程完成，完成 Future
@@ -241,9 +252,11 @@ class AdConsentManager {
         },
         // 失敗回調：處理錯誤
         (FormError error) {
-          debugPrint('AdConsentManager: 請求授權資訊更新失敗: ${error.message} (code: ${error.code})');
+          debugPrint('AdConsentManager: 請求授權資訊更新失敗: ${error.message} (code: ${error.errorCode})');
           
           // 即使請求失敗，也嘗試更新狀態（可能使用緩存的狀態）
+          // 注意：這裡不使用 await，因為失敗回調是同步的，但 _updateCanRequestAds 是異步的
+          // 為了不阻塞，我們讓它異步執行
           _updateCanRequestAds();
           
           // 完成 Future（即使失敗也要完成，避免永遠等待）
@@ -301,15 +314,15 @@ class AdConsentManager {
     final completer = Completer<void>();
 
     try {
-      // 載入授權表單
-      await UserMessagingPlatform.instance.loadConsentForm(
+      // 載入授權表單（使用靜態方法）
+      ConsentForm.loadConsentForm(
         // 成功回調：表單已載入
         (ConsentForm form) async {
           _consentForm = form;
           debugPrint('AdConsentManager: 授權表單載入成功');
           
           // 檢查授權狀態
-          final consentStatus = _consentInformation.consentStatus;
+          final consentStatus = await _consentInformation.getConsentStatus();
           debugPrint('AdConsentManager: 當前授權狀態: $consentStatus');
           
           // 如果授權狀態為 required，需要顯示表單
@@ -324,12 +337,12 @@ class AdConsentManager {
                 // 表單關閉回調
                 (FormError? error) {
                   if (error != null) {
-                    debugPrint('AdConsentManager: 顯示授權表單時發生錯誤: ${error.message} (code: ${error.code})');
+                    debugPrint('AdConsentManager: 顯示授權表單時發生錯誤: ${error.message} (code: ${error.errorCode})');
                   } else {
                     debugPrint('AdConsentManager: 授權表單已關閉');
                   }
                   
-                  // 更新狀態
+                  // 更新狀態（異步執行，不等待）
                   _updateCanRequestAds();
                   
                   // 表單已關閉，完成 Future
@@ -348,7 +361,7 @@ class AdConsentManager {
           } else {
             // 不需要顯示表單，直接更新狀態並完成 Future
             debugPrint('AdConsentManager: 不需要顯示授權表單，當前狀態: $consentStatus');
-            _updateCanRequestAds();
+            await _updateCanRequestAds();
             
             if (!completer.isCompleted) {
               completer.complete();
@@ -357,9 +370,9 @@ class AdConsentManager {
         },
         // 失敗回調：載入表單失敗
         (FormError error) {
-          debugPrint('AdConsentManager: 載入授權表單失敗: ${error.message} (code: ${error.code})');
+          debugPrint('AdConsentManager: 載入授權表單失敗: ${error.message} (code: ${error.errorCode})');
           
-          // 即使載入失敗，也嘗試更新狀態
+          // 即使載入失敗，也嘗試更新狀態（異步執行，不等待）
           _updateCanRequestAds();
           
           // 完成 Future（即使失敗也要完成，避免永遠等待）
@@ -370,6 +383,7 @@ class AdConsentManager {
       );
     } catch (e) {
       debugPrint('AdConsentManager: 載入授權表單時發生異常: $e');
+      // 異步更新狀態，不等待
       _updateCanRequestAds();
       
       // 發生異常時也要完成 Future
@@ -386,15 +400,15 @@ class AdConsentManager {
   /// 
   /// 此方法會根據當前的授權資訊更新 [canRequestAds] 屬性，
   /// 並通過 Stream 通知監聽者狀態變更
-  void _updateCanRequestAds() {
+  Future<void> _updateCanRequestAds() async {
     if (!_isInitialized) {
       return;
     }
 
     final previousValue = canRequestAds;
-    canRequestAds = _consentInformation.canRequestAds;
+    canRequestAds = await _consentInformation.canRequestAds();
     
-    final consentStatus = _consentInformation.consentStatus;
+    final consentStatus = await _consentInformation.getConsentStatus();
     debugPrint('AdConsentManager: 更新授權狀態 - canRequestAds: $canRequestAds, consentStatus: $consentStatus');
     
     // 如果狀態變更，通知監聽者
@@ -415,27 +429,27 @@ class AdConsentManager {
 
     debugPrint('AdConsentManager: 重置授權狀態');
     await _consentInformation.reset();
-    _updateCanRequestAds();
+    await _updateCanRequestAds();
   }
 
   /// 獲取當前授權狀態
   /// 
   /// 返回當前的 [ConsentStatus]，可用於調試或日誌記錄
-  ConsentStatus? get consentStatus {
+  Future<ConsentStatus?> getConsentStatus() async {
     if (!_isInitialized) {
       return null;
     }
-    return _consentInformation.consentStatus;
+    return await _consentInformation.getConsentStatus();
   }
 
   /// 檢查授權表單是否可用
   /// 
   /// 返回授權表單是否已載入並可用
-  bool get isConsentFormAvailable {
+  Future<bool> isConsentFormAvailable() async {
     if (!_isInitialized) {
       return false;
     }
-    return _consentInformation.isConsentFormAvailable;
+    return await _consentInformation.isConsentFormAvailable();
   }
 
   /// 釋放資源
