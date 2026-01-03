@@ -2,35 +2,37 @@
 
 - App Framework: Flutter (iOS 優先, Android 兼容)
 - Language: Dart
-- State Management: Flutter Riverpod (2.x) 搭配 Code Generation
-- Navigation: GoRouter
-- Backend: Firebase (Auth, Firestore, Cloud Functions)
+- State Management: Flutter Riverpod (2.5.1) 使用 StateNotifierProvider
+- Navigation: GoRouter (13.2.2)
+- Backend: Firebase (Firebase Core, Cloud Functions)
 - AI/ML:
-    - Client-side OCR: google_mlkit_text_recognition
-    - Server-side NLP: OpenAI API (透過 Cloud Functions 呼叫)
+    - OCR: 後端使用 OpenAI Vision API (gpt-4o-mini) 進行圖片文字識別
+    - NLP: OpenAI API (透過 Cloud Functions 呼叫) 進行對話分析
 
-- Ads: google_mobile_ads
-- Local Storage: shared_preferences 或 hive (用於儲存歷史紀錄)
-- I18n: flutter_localizations (預設 zh_TW)
+- Ads: google_mobile_ads (7.0.0)
+- Local Storage: shared_preferences (2.2.2) 用於儲存歷史紀錄（JSON 格式）
+- I18n: flutter_localizations (使用 ARB 檔案：app_zh_TW.arb, app_zh.arb)
 
 架構與分層 (Architecture)
 
-- Presentation（Widgets/Pages）  
-- Application（UseCases / Controllers）  
-- Domain（Entities / Repositories Interfaces）  
-- Infrastructure（Firebase/HTTP/Ads/Analytics 實作）  
-- 透過 Riverpod + ProviderScope 注入依賴（DI），Repository/Service 以 interface + 實作分離  
+- Presentation（Widgets/Pages）：HomePage, ResultPage, ResultSentencePage, HistoryPage, WelcomePage
+- Core（Models/Providers/Theme）：AnalysisResult, AnalysisProvider, HistoryProvider, LocaleProvider, ErrorProvider
+- Services：AnalysisService, AdService, ImageService, StorageService, AdConsentManager, ScreenshotService
+- Features（Repositories）：AnalysisRepository
+- 透過 Riverpod + ProviderScope 注入依賴，使用 StateNotifierProvider 管理狀態  
 
 錯誤與重試策略 (Errors & Retry)
 
-- 定義錯誤型別：NetworkError / AdsError / OcrError / OaiError / ValidationError  
-- 對可重試的操作（廣告載入、函式呼叫）採指數退避（exponential backoff + jitter）  
-- 端上顯示人性化錯誤，並上報 error_occurred 事件（含分類/狀態碼）  
+- 定義錯誤型別：AnalysisException (AnalysisExceptionType: invalidImage, serverError, networkError, unknown)
+- 廣告載入採用固定延遲重試（3秒，最多5次）
+- 本地儲存操作採用重試機制（最多3次，50ms延遲）處理競態條件
+- 端上顯示人性化錯誤訊息，錯誤透過 AnalysisState 的 errorMessage 傳遞  
 
 Analytics 事件
 
-- analysis_start, ocr_complete, ad_load/ad_show/ad_earn, advanced_unlock, share_image, error_occurred  
-- 重要屬性：modelVersion, chatAppType, locale, processingTimeMs, sentenceCount, isGroupFlag  
+- 目前未實作 Analytics 追蹤（規劃中）
+- 規劃事件：analysis_start, ocr_complete, ad_load/ad_show/ad_earn, advanced_unlock, share_image, error_occurred
+- 規劃屬性：modelVersion, chatAppType, locale, processingTimeMs, sentenceCount, isGroupFlag  
 
 i18n 與內容生成
 
@@ -40,16 +42,24 @@ i18n 與內容生成
 
 廣告與合規
 
-- google_mobile_ads：預設 NPA（非個人化）；Rewarded Ads  
-- UMP（GDPR/CCPA）與 iOS ATT 流程整合；未同意時限制資料收集  
-- AdMob SSV：Rewarded 後端核銷，回傳 token 與驗證簽章  
-- App Check 啟用，限制 Functions 訪問；速率限制與設備級配額  
+- google_mobile_ads：Rewarded Ads（分為 startAnalysis 和 advancedAnalysis 兩種類型）
+- UMP（User Messaging Platform）：使用 AdConsentManager 處理 GDPR/CCPA 授權流程
+- 授權流程：初始化時請求授權資訊更新，只有在取得用戶同意後才初始化廣告 SDK
+- iOS ATT 流程：規劃中（目前未實作）
+- AdMob SSV（Server-Side Verification）：規劃中，目前未實作 redeemAd 函數
+- App Check：規劃中（目前未啟用）  
 
 後端（Firebase + Cloud Functions）
 
-- Callable Functions：/analyzeText、/redeemAd（驗證 SSV）  
-- 原文處理：對話原文（含人名）直接送 LLM 分析；不做 PII 遮罩與摘要；僅在函式執行期駐留記憶體，不做持久化  
-- 超長處理：採分段滑窗（sliding window）全量分析，確保上下文一致性；UI 可挑選關鍵句展示，但 LLM 分析以原文為準  
-- 快取與成本：以 ocrHash 做去重快取（避免重複分析）；可分段並行處理以降低延遲  
-- 安全：Moderation 旗標（bullying/sexual/profanity），對輸出做溫和化處理（不影響原文傳遞）  
-- 日誌與版本：記錄 modelVersion、processingTimeMs、錯誤碼，便於回溯與優化  
+- Callable Functions：/analyzeConversation（分析對話截圖）
+- OCR 與 NLP：使用 OpenAI Vision API (gpt-4o-mini) 同時進行圖片文字識別與對話分析
+- 原文處理：對話原文（含人名）直接送 LLM 分析；不做 PII 遮罩與摘要；僅在函式執行期駐留記憶體，不做持久化
+- 分析流程：
+  - 使用 OpenAI Vision API 的 image_url 參數直接分析 Base64 編碼的圖片
+  - LLM 同時執行 OCR 識別和對話分析，返回結構化 JSON 結果
+  - 選出 3-8 句關鍵對話進行逐句分析（按圖片中從上到下的順序）
+- 錯誤處理：檢查圖片是否為對話截圖（invalid_image_content），驗證必要欄位
+- 日誌：記錄函數調用、OpenAI API 調用、處理時間、Token 使用量等資訊
+- 模型：使用 gpt-4o-mini，temperature=0.3，max_tokens=4000，response_format=json_object
+- 安全：規劃 Moderation 旗標（目前未實作）
+- 快取：規劃 ocrHash 去重快取（目前未實作）  

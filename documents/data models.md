@@ -1,59 +1,66 @@
 ## **曖昧分析指標**
 
-### **雷達圖** 
+### **雷達圖（六維度）** 
 
-1. 情緒投入度（Emotional Engagement）  
-   曖昧的本質是「在意」。一個人是否願意展示情緒（開心、生氣、擔心、心疼、撒嬌），是判斷曖昧最核心的指標之一。
+1. **撩撥張力（Tension）**  
+   評估是否存在「火花」？調情、故意挑釁、反向操作。是否利用雙關、學術梗或角色扮演來進行心理拉扯。
+
+   NLP 評分依據  
+* 撩人/曖昧玩笑（跪、傻瓜、給我啾一口…）  
+* 性張力 or 軽度戲謔（你想怎麼補償？）  
+* 角色扮演（你跪下我原諒你）  
+* 雙關語、含蓄暗示  
+* 反向操作、故意挑釁
+
+2. **自我揭露（Disclosure）**  
+   評估是否願意展示私密情緒、分享非必要的瑣碎生活或個人弱點？
 
    NLP 評分依據  
 * 情緒性詞彙（生氣、難過、可愛、緊張、心疼…）  
 * 表達脆弱、羞愧、自責、在乎的句型（如「我竟然忘記回你」）  
 * 情緒表情符號（🥺😢😍😳）  
 * 感嘆詞（欸、啦、喔、嗚嗚…）  
-* 負面情緒是否由對方安撫（= 情緒依賴）  
-* 情緒強度（比喻、語氣詞、反覆強調）
+* 分享私生活的細節  
+* 負面情緒是否由對方安撫（= 情緒依賴）
 
-2. 語氣親密度（Intimacy of Tone）  
-   曖昧關係裡，語氣會自然變得輕、軟、甜、有點像講悄悄話。親密語氣往往比字面內容更有指標性。
-
-   NLP 評分依據  
-* 親暱稱呼（你呀、小笨蛋、baby、你幹嘛啦）  
-* 軟化語氣的助詞（啦、呀、欸、小、一下下、啾）  
-* 隱含肢體語言（抱、摸頭、啾、靠過來…）  
-* 對方語氣是否像「對一個特別的人說」  
-* 句子是否溫柔 vs. 中性 vs. 生硬
-
-3. 玩笑 / 調情程度（Playfulness / Flirtation）  
-   曖昧的「味道」最常來自玩鬧、互相挑釁、半真半假的暗示。玩笑常常是調情的包裝。
+3. **關係動能（Momentum）**  
+   評估關係是否有向前推進的意圖（如：見面暗示、未來規劃、感情狀態試探）。
 
    NLP 評分依據  
-* 撩人/曖昧玩笑（跪、傻瓜、給我啾一口…）  
-* 性張力 or 軽度戲謔（你想怎麼補償？）  
-* 角色扮演（你跪下我原諒你）  
-* 過度可愛化語氣（啊啊啊可愛死了）  
-* 雙關語、含蓄暗示
-
-4. 回覆積極度（Responsiveness / Engagement）  
-   「是否想跟你聊天」是判斷曖昧的重要基礎。積極回覆＝願意投入。
-
-   NLP 評分依據  
-* 回覆速度（從截圖時間推估），若無可靠的逐則訊息時間戳，降低此維度權重  
-* 回覆長度（不是敷衍）  
 * 是否主動開話題  
-* 是否接住對方情緒  
-* 是否提供資訊 vs. 單純應付  
+* 是否接住對方情緒並延續對話  
+* 是否有見面暗示或未來規劃  
+* 是否試探感情狀態  
 * 是否結束對話 or 讓對話延續
 
-5. 互動平衡度（Interaction Balance）  
-   健康的曖昧通常是 **雙向的**。不是單方面撩、或單方面敷衍。互動平衡度越高，曖昧越「穩定互相」。
+4. **專屬特權（Exclusivity）**  
+   評估是否建立了一種「只有我們懂」的氛圍，將其他人隔絕在外。例如：我們的祕密、我們的活動、經歷、我們才懂得的梗。
 
    NLP 評分依據  
-* 雙方是否都有主動（不是單方話多）  
-* 對話的 “能量量級” 是否相當  
-* 語氣回應是否互補（對方撒嬌 → 你安撫）  
-* 回覆情緒強度是否平衡  
-* 玩笑是否雙向  
-* 調情是否雙向（不是單方）
+* 是否建立專屬的梗或默契  
+* 是否提及共同經歷或回憶  
+* 是否將其他人隔絕在外  
+* 是否創造「只有我們懂」的氛圍  
+* 語氣是否像「對一個特別的人說」
+
+5. **誘敵導引（Baiting）**  
+   俗稱「做球」。是否主動製造被撩的機會、拋出容易接續的話題或顯示需求感。
+
+   NLP 評分依據  
+* 是否主動製造被撩的機會  
+* 是否拋出容易接續的話題  
+* 是否顯示需求感或期待  
+* 是否在對話中「做球」給對方  
+* 是否創造互動的機會
+
+6. **心理防禦（Defense）**  
+   識別「保護色」。是否在釋放張力後利用專業身分或玩笑掩飾真心。
+
+   NLP 評分依據  
+* 是否在釋放高張力訊號後立刻掩蓋  
+* 是否用專業、玩笑或第三方話題掩飾  
+* 是否使用「逃生門」機制  
+* 是否在高階曖昧中表現防禦
 
 
 ### **曖昧指數 0–10**
@@ -122,20 +129,39 @@
 
 ###A. 分析請求 (AnalysisRequest)###
 
-class AnalysisRequest {
-  final String userId;
-  final String imageBase64;    // 壓縮後的對話截圖 (Base64 String)
-  final String language;       // App 當前語言 (zh-TW)
-}
+注意：實際實作中，分析請求直接透過 Firebase Functions 的 `analyzeConversation` 函數發送，不單獨定義 Request 類別。請求參數包括：
+
+* imageBase64: String - 壓縮後的對話截圖 (Base64 String)
+* language: String - App 當前語言代碼（例如：'zh-TW'）
 
 
 ###B. 雷達圖維度 (RadarMetric)###
 
 class RadarMetric {
   final double score;       // 0-10 分
-  final String description; // 該維度的具體評語
+  final String description; // 該維度的具體評語（至少 40 個字）
   
   RadarMetric({required this.score, required this.description});
+}
+
+###B-1. 雷達圖 (Radar)###
+
+class Radar {
+  final RadarMetric tension;      // 撩撥張力
+  final RadarMetric disclosure;   // 自我揭露
+  final RadarMetric momentum;     // 關係動能
+  final RadarMetric exclusivity;  // 專屬特權
+  final RadarMetric baiting;      // 誘敵導引
+  final RadarMetric defense;      // 心理防禦
+  
+  Radar({
+    required this.tension,
+    required this.disclosure,
+    required this.momentum,
+    required this.exclusivity,
+    required this.baiting,
+    required this.defense,
+  });
 }
 
 
@@ -146,12 +172,8 @@ class AnalysisResult {
   final DateTime createdAt;      // 建立時間 (用於歷史排序)
   final String partnerName;      // 對方名稱 (由 LLM 推測或顯示為 "對方")
   
-  // 雷達圖五維度
-  final RadarMetric emotional;
-  final RadarMetric intimacy;
-  final RadarMetric playfulness;
-  final RadarMetric responsive;
-  final RadarMetric balance;
+  // 雷達圖六維度
+  final Radar radar;  // 包含六個維度：tension, disclosure, momentum, exclusivity, baiting, defense
   
   final double totalScore;       // 總分 (對應圖中的 9/10)
   final String relationshipStatus; // 關係狀態短語 (如: "準告白狀態", "純屬路人") - 對應圖中分數旁的文字
@@ -185,6 +207,18 @@ class SentenceAnalysis {
     required this.hiddenMeaning,
     required this.flirtScore,
     required this.scoreReason,
+  });
+}
+
+###E. 歷史記錄項目 (AnalysisHistoryEntry)###
+
+class AnalysisHistoryEntry {
+  final AnalysisResult result;      // 分析結果
+  final String? imageBase64;        // 對話截圖（可選，用於重新查看時顯示）
+  
+  AnalysisHistoryEntry({
+    required this.result,
+    this.imageBase64,
   });
 }
 

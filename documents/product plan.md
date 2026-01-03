@@ -18,12 +18,13 @@
    * Ad上方一個小空間，動畫提示：「正在揣摩他的心思...💭」  
 3. **結果頁面（重點畫面）**  
    * **主結果區**：曖昧指數分數（0\~10）+ 雷達圖  
-     * 雷達圖五向度：  
-       1. 情緒投入感（Emotional Engagement）  
-       2. 語氣親密度（Intimacy of Tone）  
-       3. 玩笑 / 調情程度（Playfulness / Flirtation）  
-       4. 回覆積極度（Responsiveness / Engagement）  
-       5. 互動平衡度（Interaction Balance）  
+     * 雷達圖六向度：  
+       1. 撩撥張力（Tension）  
+       2. 自我揭露（Disclosure）  
+       3. 關係動能（Momentum）  
+       4. 專屬特權（Exclusivity）  
+       5. 誘敵導引（Baiting）  
+       6. 心理防禦（Defense）  
      * 分數顯示需要延遲一點時間，並用動畫，營造期待的感覺。  
      * 雷達圖顯示也需要動畫  
    * **總結**：
@@ -72,8 +73,9 @@
 
 5. **分析記錄頁面**  
    * 本地儲存一個標記 (Flag)，記錄用戶是否已為該次分析解鎖了內容。如果已解鎖，則從記錄頁面重新查看時**無需再次觀看廣告**  
-   * Rewarded Ad 解鎖採用 AdMob Server-Side Verification（SSV）於後端核銷；App 端旗標僅作體驗快取  
-   * 可刪除分析記錄  
+   * 使用 shared_preferences 儲存分析歷史（JSON 格式，時間倒序排列）  
+   * AdMob Server-Side Verification（SSV）規劃中，目前未實作；App 端旗標作為解鎖狀態快取  
+   * 可刪除分析記錄（支援重試機制處理競態條件）  
    * 歷史列表以對方名稱（partnerName）命名，便於用戶辨識  
 6. **錯誤訊息**  
    * 如果用戶上傳的截圖不是一般訊息對話，不進行分析，跳出錯誤訊息「抱歉，請上傳**一般訊息對話**截圖，我們無法分析非對話圖片喔！ 」  
@@ -89,23 +91,23 @@
 ### **前端 (App)**
 
 * 跨平台(iOS, Android), 用Flutter開發  
-* OCR 圖片文字擷取，**iOS**與**Android 平台**皆使用 **Google ML Kit OCR**。  
-* 情緒/語氣分析視覺化（雷達圖、分數動畫）  
-* Rewarded Ad 播放與控制  
-* 分享結果截圖產生器
+* 圖片處理：使用 image_picker 選取圖片，flutter_image_compress 壓縮並轉換為 Base64  
+* OCR 圖片文字擷取：**後端使用 OpenAI Vision API (gpt-4o-mini) 同時進行 OCR 識別與對話分析**（非客戶端 OCR）  
+* 狀態管理：使用 Flutter Riverpod (StateNotifierProvider) 管理分析狀態、歷史記錄、錯誤狀態  
+* 路由：使用 GoRouter 進行頁面導航（WelcomePage, HomePage, ResultPage, ResultSentencePage, HistoryPage）  
+* 情緒/語氣分析視覺化（雷達圖、分數動畫，使用 fl_chart）  
+* Rewarded Ad 播放與控制（google_mobile_ads，分為 startAnalysis 和 advancedAnalysis 兩種類型）  
+* 分享結果截圖產生器（screenshot_service，使用 share_plus）
 
 ### **後端** 
 
-* NLP 分析模型（使用OpenAI API）  
-* 後端可選 Firebase  
-* 廣告與 Rewarded 機制管理 （Google AdMob）  
+* 使用 Firebase Cloud Functions（TypeScript）  
+* OCR 與 NLP 分析：使用 OpenAI Vision API (gpt-4o-mini) 同時進行圖片文字識別與對話分析  
+* Cloud Functions：`analyzeConversation` - 接收 Base64 圖片，調用 OpenAI Vision API，返回結構化分析結果  
 * 對話原文（含人名）會傳至 Cloud Functions 供 LLM 分析；僅於處理期間駐留記憶體，不做持久化儲存  
-* App 端保留本地歷史（Hive/可加密）；後端只保留匿名統計與廣告核銷憑證
-* 報表：  
-  * 用戶下載後，分析對話的頻率  
-  * 一般分析與逐句分析的廣告必須分開統計  
-  * 分析用戶的平均對話長度  
-  * 一般分析與逐句分析後，用戶的截圖率
+* App 端保留本地歷史（shared_preferences，JSON 格式）；後端不保留任何用戶數據  
+* 報表與 Analytics：規劃中（目前未實作）  
+  * 規劃項目：用戶下載後分析對話的頻率、一般分析與逐句分析的廣告統計、分析用戶的平均對話長度、截圖率等
 
 ## ⛑️ **開發順序**
 
@@ -116,18 +118,24 @@
 ## **🔒 合規與廣告政策**
 
 - 僅供娛樂用途：結果為機器推估，可能有誤差，請勿作為情感建議  
-- 隱私：對話內容分析後，僅本地儲存（可一鍵刪除）  
-- 同意與隱私管理：Google UMP（GDPR/CCPA），iOS ATT 流程  
-- 廣告：預設非個人化廣告（NPA），採用 Rewarded Ad + AdMob SSV 後端核銷  
-- 安全過濾：對辱罵、霸凌、成人或敏感內容做適度溫和化輸出與標記  
+- 隱私：對話內容分析後，僅本地儲存（shared_preferences，可一鍵刪除）  
+- 同意與隱私管理：
+  - Google UMP（User Messaging Platform）：已實作，使用 AdConsentManager 處理 GDPR/CCPA 授權流程  
+  - iOS ATT（App Tracking Transparency）：規劃中（目前未實作）  
+- 廣告：使用 Rewarded Ad（google_mobile_ads），分為 startAnalysis 和 advancedAnalysis 兩種類型  
+- AdMob SSV（Server-Side Verification）：規劃中（目前未實作 redeemAd 函數）  
+- 安全過濾：規劃中（目前未實作 Moderation 旗標）  
 
 ## **📈 Analytics 事件**
 
-- analysis_start（開始分析）  
-- ocr_complete（OCR 完成）  
-- ad_load / ad_show / ad_earn（廣告載入/顯示/獲得獎勵）  
-- advanced_unlock（逐句分析解鎖）  
-- share_image（分享長圖）  
-- error_occurred（錯誤，附錯誤型別與狀態碼）  
+- 目前未實作 Analytics 追蹤（規劃中）  
+- 規劃事件：
+  - analysis_start（開始分析）  
+  - ocr_complete（OCR 完成，但由於 OCR 在後端執行，此事件需要調整定義）  
+  - ad_load / ad_show / ad_earn（廣告載入/顯示/獲得獎勵）  
+  - advanced_unlock（逐句分析解鎖）  
+  - share_image（分享長圖）  
+  - error_occurred（錯誤，附錯誤型別與狀態碼）  
+- 規劃屬性：modelVersion, chatAppType, locale, processingTimeMs, sentenceCount, isGroupFlag  
 
 
