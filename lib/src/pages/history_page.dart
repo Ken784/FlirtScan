@@ -27,6 +27,7 @@ class HistoryPage extends ConsumerStatefulWidget {
 class _HistoryPageState extends ConsumerState<HistoryPage> {
   int _navIndex = 1;
   bool _shouldReloadOnNextBuild = false;
+  String? _lastCheckedAnalysisId; // 追蹤最後檢查的分析ID，避免重複檢查
 
   @override
   void initState() {
@@ -126,6 +127,26 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         });
       }
     });
+
+    // 檢查分析是否已完成但歷史記錄中沒有（處理從其他頁面返回的情況）
+    if (analysisState.isCompleted &&
+        analysisState.result != null &&
+        !historyState.isLoading) {
+      final currentAnalysisId = analysisState.result!.id;
+      final existsInHistory =
+          history.any((entry) => entry.result.id == currentAnalysisId);
+
+      // 如果分析已完成，但歷史記錄中沒有，且這是一個新的分析（ID不同於上次檢查的）
+      if (!existsInHistory && currentAnalysisId != _lastCheckedAnalysisId) {
+        _lastCheckedAnalysisId = currentAnalysisId;
+        // 在下一幀重新載入，避免在 build 期間修改狀態
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(historyProvider.notifier).reload();
+          }
+        });
+      }
+    }
 
     // 檢查是否需要重新載入數據（從 ResultPage 返回時）
     if (_shouldReloadOnNextBuild) {
