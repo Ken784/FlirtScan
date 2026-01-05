@@ -139,8 +139,8 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       // 如果分析已完成，但歷史記錄中沒有，且這是一個新的分析（ID不同於上次檢查的）
       if (!existsInHistory && currentAnalysisId != _lastCheckedAnalysisId) {
         _lastCheckedAnalysisId = currentAnalysisId;
-        // 在下一幀重新載入，避免在 build 期間修改狀態
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        // 延遲一小段時間後重新載入，確保保存操作已完成（與情況1保持一致）
+        Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             ref.read(historyProvider.notifier).reload();
           }

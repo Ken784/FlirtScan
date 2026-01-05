@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flirt_scan/l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/config/app_router.dart';
@@ -11,6 +14,9 @@ import 'src/core/providers/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 預熱 SharedPreferences，避免首次訪問時的延遲
+  unawaited(SharedPreferences.getInstance());
 
   // 初始化 Firebase
   await FirebaseConfig.initialize();

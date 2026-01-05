@@ -6,6 +6,7 @@ import '../../features/analysis/analysis_repository.dart';
 import '../../services/analysis_service.dart';
 import '../../services/storage_service.dart';
 import 'locale_provider.dart';
+import 'history_provider.dart';
 
 /// 分析狀態
 enum AnalysisStatus {
@@ -83,12 +84,25 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
       );
 
       // 分析完成後，自動儲存到本地歷史紀錄
-      unawaited(
-        _storageService.saveAnalysis(
-          result,
-          imageBase64: imageBase64,
-        ),
+      final saveFuture = _storageService.saveAnalysis(
+        result,
+        imageBase64: imageBase64,
       );
+      
+      // 等待保存完成後，通知 historyProvider 重新載入（如果已初始化）
+      saveFuture.then((_) {
+        try {
+          // 只有在 historyProvider 已初始化的情況下才通知
+          // 使用 read 而不是 watch，避免不必要的依賴
+          ref.read(historyProvider.notifier).reload();
+        } catch (_) {
+          // historyProvider 可能尚未初始化，這是正常的
+          // 當用戶首次進入 HistoryPage 時會自動載入最新數據
+        }
+      });
+      
+      // 不等待保存完成，避免阻塞 UI
+      unawaited(saveFuture);
     } on AnalysisException catch (e) {
       state = state.copyWith(
         status: AnalysisStatus.error,
@@ -114,12 +128,21 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
       state = state.copyWith(result: updatedResult);
 
       // 將「進階已解鎖」狀態同步回歷史紀錄
-      unawaited(
-        _storageService.saveAnalysis(
-          updatedResult,
-          imageBase64: state.imageBase64,
-        ),
+      final saveFuture = _storageService.saveAnalysis(
+        updatedResult,
+        imageBase64: state.imageBase64,
       );
+      
+      // 等待保存完成後，通知 historyProvider 重新載入（如果已初始化）
+      saveFuture.then((_) {
+        try {
+          ref.read(historyProvider.notifier).reload();
+        } catch (_) {
+          // historyProvider 可能尚未初始化，這是正常的
+        }
+      });
+      
+      unawaited(saveFuture);
     }
   }
 
