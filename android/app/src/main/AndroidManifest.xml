@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="flirt_scan"
+        android:label="Flirt Scan"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- Google Mobile Ads App ID -->

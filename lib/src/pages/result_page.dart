@@ -297,66 +297,25 @@ class _ResultPageState extends ConsumerState<ResultPage>
   }
 
   Widget _buildAnalyzingView() {
-    return Column(
-      children: [
-        // 上方處理條（類似 AnalysisPage）
-        Container(
-          height: 44,
-          color: Colors.black,
-          child: Stack(
+    return Center(
+      child: Container(
+        height: 44,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 左右掃描的漸層動畫
-              AnimatedBuilder(
-                animation: _scanAnimation,
-                builder: (context, child) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _isMovingRightNotifier,
-                    builder: (context, isMovingRight, child) {
-                      return Positioned.fill(
-                        child: CustomPaint(
-                          painter: _ScanGradientPainter(
-                            animationValue: _scanAnimation.value,
-                            isMovingRight: isMovingRight,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-              // 文字內容
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '正在解讀...',
-                        style: AppTextStyles.body2Semi.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                      ),
-                      _AnimatedDots(),
-                    ],
-                  ),
+              Text(
+                '正在解讀',
+                style: AppTextStyles.body2Semi.copyWith(
+                  color: AppColors.textBlack,
                 ),
               ),
+              _AnimatedDots(),
             ],
           ),
         ),
-        // 下方空白區域（可以顯示廣告或其他內容）
-        Expanded(
-          child: Container(
-            color: Colors.grey[900],
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -821,7 +780,7 @@ class _AnimatedDotsState extends State<_AnimatedDots>
                 child: Text(
                   '·',
                   style: AppTextStyles.body2Semi.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: AppColors.textBlack,
                   ),
                 ),
               ),
