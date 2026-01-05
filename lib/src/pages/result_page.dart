@@ -567,12 +567,12 @@ class _ResultPageState extends ConsumerState<ResultPage>
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 InsightCard(
-                  title: '🔍 語氣洞察',
+                  title: '語氣洞察',
                   body: result.toneInsight,
                 ),
                 const SizedBox(height: AppSpacing.s16),
                 SummaryCard(
-                  title: '✨ 總結',
+                  title: '總結',
                   content: summaryContent,
                   bulletPoints: bulletPoints,
                 ),

@@ -32,7 +32,7 @@ class AdvancedSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '✨ 總結',
+            '總結',
             style: AppTextStyles.body2Semi.copyWith(
               color: Colors.white,
             ),
