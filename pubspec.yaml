@@ -1,7 +1,9 @@
 name: flirt_scan
 description: FlirtScan Flutter app
 publish_to: "none"
-version: 0.1.0
+
+# 格式：版本號+建置號碼
+version: 1.1.0+1
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
