@@ -48,6 +48,9 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.2.2
   
+  # Package Info
+  package_info_plus: ^8.0.0
+  
   # Share
   share_plus: ^10.1.2
 

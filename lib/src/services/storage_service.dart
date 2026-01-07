@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/models/analysis_result.dart';
@@ -44,6 +45,10 @@ class AnalysisHistoryEntry {
 class StorageService {
   // 更新版本以忽略舊格式資料（v1 使用舊的雷達圖欄位格式）
   static const String _historyKey = 'analysis_history_v2';
+  static const String _installedVersionKey = 'installed_app_version';
+  static const String _installedBuildKey = 'installed_app_build';
+  // Debug 模式下用於檢測新運行的標記
+  static const String _debugSessionKey = 'debug_last_session_build';
 
   /// 儲存一次分析結果到歷史紀錄
   /// - 如果已有相同 id 的紀錄，會先移除舊的再插入新的
@@ -188,6 +193,70 @@ class StorageService {
 
       // 已達最大重試次數，目標 ID 不存在，視為成功（可能已被其他操作刪除）
       return;
+    }
+  }
+
+  /// 清除所有歷史記錄
+  Future<void> clearHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_historyKey);
+  }
+
+  /// 清除所有本地存儲（用於新安裝時重置）
+  static Future<void> clearAllStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_historyKey);
+    await prefs.remove('has_seen_onboarding');
+    // 注意：不刪除版本相關的 key，因為需要用它來判斷
+  }
+
+  /// 檢查並處理新安裝/更新
+  /// 
+  /// 邏輯：
+  /// 1. Debug/Profile 模式：每次啟動都清除（因為是開發測試環境）
+  /// 2. Production 模式：只有第一次安裝時清除，更新時不清除
+  /// 
+  /// 返回 true 表示已清除數據（新安裝），false 表示未清除（更新或同版本）
+  static Future<bool> checkAndHandleNewInstall(
+    String currentVersion,
+    String currentBuildNumber,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (kDebugMode || kProfileMode) {
+      // Debug/Profile 模式：每次啟動都清除（開發測試環境）
+      debugPrint('Debug/Profile 模式：每次運行都清除數據');
+      await clearAllStorage();
+      
+      // 更新 session 標記
+      await prefs.setString(_debugSessionKey, currentBuildNumber);
+      await prefs.setString(_installedVersionKey, currentVersion);
+      await prefs.setString(_installedBuildKey, currentBuildNumber);
+      
+      return true; // 返回 true 表示已清除數據
+    } else {
+      // Production 模式：只有第一次安裝時清除（沒有存儲的版本號）
+      final lastInstalledVersion = prefs.getString(_installedVersionKey);
+      
+      if (lastInstalledVersion == null) {
+        debugPrint('Production 模式：第一次安裝，清除數據');
+        await clearAllStorage();
+        
+        // 更新版本號和 build number
+        await prefs.setString(_installedVersionKey, currentVersion);
+        await prefs.setString(_installedBuildKey, currentBuildNumber);
+        
+        return true; // 返回 true 表示已清除數據
+      } else if (lastInstalledVersion != currentVersion) {
+        debugPrint('Production 模式：版本更新 ($lastInstalledVersion -> $currentVersion)，保留數據');
+        // 更新版本號，但不清除數據
+        await prefs.setString(_installedVersionKey, currentVersion);
+        await prefs.setString(_installedBuildKey, currentBuildNumber);
+        return false; // 返回 false 表示未清除（這是更新）
+      } else {
+        debugPrint('Production 模式：版本未變，保留數據');
+        return false; // 返回 false 表示未清除
+      }
     }
   }
 }

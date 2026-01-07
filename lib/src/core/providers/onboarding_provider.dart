@@ -33,6 +33,17 @@ class OnboardingNotifier extends StateNotifier<bool> {
       state = false;
     }
   }
+
+  /// 重置歡迎畫面狀態（用於新安裝時）
+  Future<void> resetOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_hasSeenOnboardingKey);
+      state = true; // 重置為需要顯示歡迎頁面
+    } catch (e) {
+      state = true;
+    }
+  }
 }
 
 final onboardingProvider =

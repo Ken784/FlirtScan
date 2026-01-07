@@ -39,6 +39,9 @@ class AdConsentManager {
   /// 是否已初始化
   bool _isInitialized = false;
   
+  /// 是否已初始化（公開 getter）
+  bool get isInitialized => _isInitialized;
+  
   /// 是否正在處理授權流程
   bool _isProcessing = false;
   
@@ -314,6 +317,7 @@ class AdConsentManager {
     final completer = Completer<void>();
 
     try {
+      debugPrint('開始載入授權表單...');
       // 載入授權表單（使用靜態方法）
       ConsentForm.loadConsentForm(
         // 成功回調：表單已載入
@@ -424,12 +428,17 @@ class AdConsentManager {
   /// 注意：在生產環境中應該謹慎使用
   Future<void> reset() async {
     if (!_isInitialized) {
+      debugPrint('AdConsentManager: 尚未初始化，無法重置授權狀態');
       return;
     }
 
     debugPrint('AdConsentManager: 重置授權狀態');
-    await _consentInformation.reset();
-    await _updateCanRequestAds();
+    try {
+      await _consentInformation.reset();
+      await _updateCanRequestAds();
+    } catch (e) {
+      debugPrint('AdConsentManager: 重置授權狀態時發生異常: $e');
+    }
   }
 
   /// 獲取當前授權狀態
