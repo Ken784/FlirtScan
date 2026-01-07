@@ -174,21 +174,24 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                   child: CircularProgressIndicator(color: Colors.white),
                 )
               : history.isEmpty
-                  ? ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.s20, 0, AppSpacing.s20, 120),
+                  ? Column(
                       children: [
-                        PageHeader(
-                          title: '分析記錄',
-                          leading: AppIconWidgets.inbox(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.s20),
+                          child: PageHeader(
+                            title: '分析記錄',
+                            leading: AppIconWidgets.inbox(),
+                          ),
                         ),
-                        const SizedBox(height: AppSpacing.s32),
-                        Center(
-                          child: Text(
-                            '沒有儲存的紀錄',
-                            style: AppTextStyles.body3Semi
-                                .copyWith(color: AppColors.textBlack80),
-                            textAlign: TextAlign.center,
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              '沒有儲存的紀錄',
+                              style: AppTextStyles.body3Semi
+                                  .copyWith(color: AppColors.textBlack80),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ],
